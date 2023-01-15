@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
@@ -12,13 +15,19 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends TimedRobot {
 	private final XboxController m_controller = new XboxController(0);
 	private final Drivetrain m_swerve = new Drivetrain();
+
+	String autoExample = "paths/YourPath.wpilib.json";
+	Trajectory trajectory = new Trajectory();
 
 	HolonomicDriveController controller = new HolonomicDriveController(
 	new PIDController(1, 0, 0), new PIDController(1, 0, 0),
@@ -31,12 +40,22 @@ public class Robot extends TimedRobot {
 	private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
 	//function for HDC
-	public void holonomicDrive(double time, Trajectory trajectory){
+	public void followTrajectory(double time, Trajectory trajectory){
 		Trajectory.State goal = trajectory.sample(time);
-		ChassisSpeeds adjustedSpeeds = controller.calculate(trajectory, goal, Rotation2d.fromDegrees(70.0));
+		ChassisSpeeds adjustedSpeeds = controller.calculate(m_swerve.getPose(), goal, Rotation2d.fromDegrees(70.0));
+		m_swerve.drive(adjustedSpeeds.vxMetersPerSecond, adjustedSpeeds.vyMetersPerSecond, adjustedSpeeds.omegaRadiansPerSecond, true);
 	}
 
-
+	public Trajectory getPath(String selectedAuto){
+		try {
+			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(selectedAuto);
+			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+		 } catch (IOException ex) {
+			DriverStation.reportError("Unable to open trajectory: " + selectedAuto, ex.getStackTrace());
+		 }
+		return trajectory;
+	}
+ 
 	@Override
 	public void autonomousPeriodic() {
 		driveWithJoystick(false);
