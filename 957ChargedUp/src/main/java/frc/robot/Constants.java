@@ -134,4 +134,26 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class FourBarPidConstants{
+	public static final double kFourBarP = 5e-5; 
+    public static final double kFourBarI = 1e-6;
+    public static final double kFourBarD = 0;
+    public static final double kFourBarFF = 0.000156; 
+    public static final double kFourBarMinOutput = -1;
+    public static final double kFourBarMaxOutput = 1;
+    public static final double barMaxVel = 2000; 
+    public static final double barMaxAcc = 1500;
+  }
+  
+  public static final class ArmPidConstants{
+	public static final double kArmP = 5e-5; 
+    public static final double kArmI = 1e-6;
+    public static final double kArmD = 0;
+    public static final double kArmFF = 0.000156; 
+    public static final double kArmMinOutput = -1;
+    public static final double kArmMaxOutput = 1;
+    public static final double armMaxVel = 2000; 
+    public static final double armMaxAcc = 1500;
+  }
 }

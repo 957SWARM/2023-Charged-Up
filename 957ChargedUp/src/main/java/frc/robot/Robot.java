@@ -39,6 +39,17 @@ public class Robot extends TimedRobot {
 	private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
+	//BUTTONS
+	final int highFourBarPosition = 0;
+	final int midFourBarPosition = 0;
+	final int lowFourBarPosition = 0;
+	final int pickupFourBarPosition = 0;
+
+	final int deployFourBar = 0;
+
+	final int openClaw = 0;
+	final int closeClaw = 0;
+
 	//function for HDC
 	public void followTrajectory(double time, Trajectory trajectory){
 		Trajectory.State goal = trajectory.sample(time);
@@ -65,6 +76,11 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveWithJoystick(true);
+
+
+
+		
+
 	}
 
 	private void driveWithJoystick(boolean fieldRelative) {

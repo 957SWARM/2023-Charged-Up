@@ -19,10 +19,10 @@ public class Drivetrain {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
-  private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
-  private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
-  private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+  private final Translation2d m_frontLeftLocation = new Translation2d(0.3302, 0.3302); //13 inches converted into meters through google
+  private final Translation2d m_frontRightLocation = new Translation2d(0.3302, -0.3302);
+  private final Translation2d m_backLeftLocation = new Translation2d(-0.3302, 0.3302);
+  private final Translation2d m_backRightLocation = new Translation2d(-0.3302, -0.3302);
 
   private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(1, 2, 0 );
   private final MAXSwerveModule m_frontRight = new MAXSwerveModule(3, 4, 0 );
