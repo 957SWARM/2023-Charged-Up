@@ -26,8 +26,8 @@ public class Robot extends TimedRobot {
 	private final XboxController m_controller = new XboxController(0);
 	private final Drivetrain m_swerve = new Drivetrain();
 
-	String autoExample = "paths/YourPath.wpilib.json";
-	Trajectory trajectory = new Trajectory();
+	//String autoExample = "paths/YourPath.wpilib.json";
+	//Trajectory trajectory = new Trajectory();
 
 	HolonomicDriveController controller = new HolonomicDriveController(
 	new PIDController(1, 0, 0), new PIDController(1, 0, 0),
@@ -38,7 +38,7 @@ public class Robot extends TimedRobot {
 	private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
-
+/* 
 	//BUTTONS
 	final int highFourBarPosition = 0;
 	final int midFourBarPosition = 0;
@@ -49,14 +49,14 @@ public class Robot extends TimedRobot {
 
 	final int openClaw = 0;
 	final int closeClaw = 0;
-
+*/
 	//function for HDC
 	public void followTrajectory(double time, Trajectory trajectory){
 		Trajectory.State goal = trajectory.sample(time);
 		ChassisSpeeds adjustedSpeeds = controller.calculate(m_swerve.getPose(), goal, Rotation2d.fromDegrees(70.0));
 		m_swerve.drive(adjustedSpeeds.vxMetersPerSecond, adjustedSpeeds.vyMetersPerSecond, adjustedSpeeds.omegaRadiansPerSecond, true);
 	}
-
+/* 
 	public Trajectory getPath(String selectedAuto){
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(selectedAuto);
@@ -66,7 +66,7 @@ public class Robot extends TimedRobot {
 		 }
 		return trajectory;
 	}
- 
+*/
 	@Override
 	public void autonomousPeriodic() {
 		driveWithJoystick(false);
