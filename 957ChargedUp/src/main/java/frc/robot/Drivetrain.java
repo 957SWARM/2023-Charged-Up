@@ -11,29 +11,29 @@ import com.kauailabs.navx.frc.AHRS;
 //import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.wpilibj.SerialPort.Port;
+import edu.wpi.first.wpilibj.SPI.Port;
+
 
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
-  public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
+  public static final double kMaxAngularSpeed = Math.PI ; // 1/2 rotation per second
 
   private final Translation2d m_frontLeftLocation = new Translation2d(0.3302, 0.3302); //13 inches converted into meters through google
   private final Translation2d m_frontRightLocation = new Translation2d(0.3302, -0.3302);
   private final Translation2d m_backLeftLocation = new Translation2d(-0.3302, 0.3302);
   private final Translation2d m_backRightLocation = new Translation2d(-0.3302, -0.3302);
 
-  private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(1, 2, 0 );
-  private final MAXSwerveModule m_frontRight = new MAXSwerveModule(3, 4, 0 );
-  private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, 0);
-  private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, 0);
+  private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.839) * 6.28);
+  private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.556-0.25) * 6.28);
+  private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.138+0.5) * 6.28);
+  private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
   AHRS m_navx = new AHRS(Port.kMXP);
 
@@ -75,6 +75,8 @@ public class Drivetrain {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
+
+    System.out.println(swerveModuleStates[0].angle);
   } 
 
   /** Updates the field relative position of the robot. */
