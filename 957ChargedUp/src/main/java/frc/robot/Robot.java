@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
 		}
 			
 
-		driveWithJoystick(true);
+		//driveWithJoystick(true);
 
 		if (m_controller.getRawButton(2)){
 			// Getting Distance
@@ -112,17 +112,17 @@ public class Robot extends TimedRobot {
 
 			// Distance Adjustment
 			if ( distance < -distance_threshold)
-				ySpeed = -.3;
+				ySpeed = -.2;
 			else if ( distance > distance_threshold) 
-				ySpeed = .3;
+				ySpeed = .2;
 			else
 				ySpeed = 0;
 
 			// Alignment
 			if ( tx < -alignment_threshold)
-				xSpeed = 0.3;
+				xSpeed = 0.2;
 			else if( tx > alignment_threshold) {
-				xSpeed = -0.3;
+				xSpeed = -0.2;
 			}
 			else{
 				xSpeed = 0;
