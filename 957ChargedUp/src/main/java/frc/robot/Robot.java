@@ -102,10 +102,11 @@ public class Robot extends TimedRobot {
 
 		if (m_controller.getRawButton(2)){
 			// Getting Distance
-			double distance = limelight.getDistance();
 			double distance_threshold = 1.5;
 			double alignment_threshold = 1.5;
 			double tx = limelight.getTx();
+			double distance = limelight.getDistance();
+			
 			double xSpeed = 0;
 			double ySpeed = 0;
 
