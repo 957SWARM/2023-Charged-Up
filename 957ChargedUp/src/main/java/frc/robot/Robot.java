@@ -38,12 +38,16 @@ public class Robot extends TimedRobot {
 	private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
+	private double speedMult = 1; 
+	final int changeSpeedButton = 1;
+	int speedVar = 0;
 /* 
 	//BUTTONS
 	final int highFourBarPosition = 0;
 	final int midFourBarPosition = 0;
 	final int lowFourBarPosition = 0;
 	final int pickupFourBarPosition = 0;
+	
 
 	final int deployFourBar = 0;
 
@@ -78,11 +82,22 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
+		switch(speedVar){
+			case 0:
+			if(m_controller.getRawButtonReleased(changeSpeedButton)){
+			speedMult = 1;
+			speedVar++;
+			}
+
+			case 1: 
+			if(m_controller.getRawButtonReleased(changeSpeedButton)){
+			speedMult = 0.25;
+			speedVar = 0;
+			}
+		}
+			
+
 		driveWithJoystick(true);
-
-
-
-		
 
 	}
 
@@ -91,14 +106,14 @@ public class Robot extends TimedRobot {
 		// negative values when we push forward.
 		final var xSpeed =
 			-m_xspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftY(), 0.2))
-				* Drivetrain.kMaxSpeed;
+				* Drivetrain.kMaxSpeed * speedMult;
 
 		// Get the y speed or sideways/strafe speed. We are inverting this because
 		// we want a positive value when we pull to the left. Xbox controllers
 		// return positive values when you pull to the right by default.
 		final var ySpeed =
 			-m_yspeedLimiter.calculate(MathUtil.applyDeadband(m_controller.getLeftX(), 0.2))
-				* Drivetrain.kMaxSpeed;
+				* Drivetrain.kMaxSpeed * speedMult;
 
 		// Get the rate of angular rotation. We are inverting this because we want a
 		// positive value when we pull to the left (remember, CCW is positive in
