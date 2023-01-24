@@ -123,6 +123,6 @@ public class Robot extends TimedRobot {
 			-m_rotLimiter.calculate(MathUtil.applyDeadband(m_controller.getRightX(), 0.2))
 				* Drivetrain.kMaxAngularSpeed;
 
-		m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
+		m_swerve.driveAngle(xSpeed, ySpeed, 0, fieldRelative);
 	}
 }
