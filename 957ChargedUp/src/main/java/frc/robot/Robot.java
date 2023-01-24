@@ -103,6 +103,7 @@ public class Robot extends TimedRobot {
 		if (m_controller.getRawButton(2)){
 			// Getting Distance
 			double distance_threshold = 1.5;
+			double desiredDistance = 20;
 			double alignment_threshold = 1.5;
 			double tx = limelight.getTx();
 			double distance = limelight.getDistance();
@@ -111,9 +112,9 @@ public class Robot extends TimedRobot {
 			double ySpeed = 0;
 
 			// Distance Adjustment
-			if ( distance < -distance_threshold)
+			if ( distance < desiredDistance - distance_threshold)
 				ySpeed = -.2;
-			else if ( distance > distance_threshold) 
+			else if ( distance > desiredDistance + distance_threshold) 
 				ySpeed = .2;
 			else
 				ySpeed = 0;
@@ -128,6 +129,8 @@ public class Robot extends TimedRobot {
 				xSpeed = 0;
 			}
 			m_swerve.drive(xSpeed, ySpeed, 0, true);
+		}else{
+			driveWithJoystick(true);
 		}
 	}
 
