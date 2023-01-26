@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.XboxController;
 public class Robot extends TimedRobot {
 	private final XboxController m_controller = new XboxController(0);
 	private final Drivetrain m_swerve = new Drivetrain();
+	private final Limelight limelight = new Limelight();
 
 	//String autoExample = "paths/YourPath.wpilib.json";
 	//Trajectory trajectory = new Trajectory();
@@ -111,8 +112,40 @@ public class Robot extends TimedRobot {
 		}
 		
 
-		driveWithJoystick(true);
+		//driveWithJoystick(true);
 
+		if (m_controller.getRawButton(2)){
+			// Getting Distance
+			double distance_threshold = 1.5;
+			double desiredDistance = 20;
+			double alignment_threshold = 1.5;
+			double tx = limelight.getTx();
+			double distance = limelight.getDistance();
+			
+			double xSpeed = 0;
+			double ySpeed = 0;
+
+			// Distance Adjustment
+			if ( distance < desiredDistance - distance_threshold)
+				ySpeed = -.2;
+			else if ( distance > desiredDistance + distance_threshold) 
+				ySpeed = .2;
+			else
+				ySpeed = 0;
+
+			// Alignment
+			if ( tx < -alignment_threshold)
+				xSpeed = 0.2;
+			else if( tx > alignment_threshold) {
+				xSpeed = -0.2;
+			}
+			else{
+				xSpeed = 0;
+			}
+			m_swerve.drive(xSpeed, ySpeed, 0, true);
+		}else{
+			driveWithJoystick(true);
+		}
 	}
 
 
