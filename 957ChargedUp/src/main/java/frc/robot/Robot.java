@@ -172,24 +172,24 @@ public class Robot extends TimedRobot {
 				* Drivetrain.kMaxAngularSpeed;
 
 		//change angleToHold
+		double x = m_controller.getRawAxis(4);//x axis
+		double y = m_controller.getRawAxis(5);//y axis
 
+		if(x > Math.abs(0.7) || y > Math.abs(0.7) ){
+			if(holdAngleSwitch){
+				
 
-		if(holdAngleSwitch){
-			double x = m_controller.getRawAxis(4);//x axis
-			double y = m_controller.getRawAxis(5);//y axis
+				angleToHold = Math.atan(y * (1/x));
+				angleToHold = Math.toDegrees(angleToHold);
 
-			angleToHold = Math.atan(y * (1/x));
+				if(y < 0){
+					angleToHold = angleToHold + 180;
+				}
 
-			angleToHold = Math.toDegrees(angleToHold);
-
-			if(y < 0){
-				angleToHold = angleToHold + 180;
+				m_swerve.driveAngle(xSpeed, ySpeed, angleToHold, fieldRelative);
+			}else{
+				m_swerve.driveAngle(xSpeed, ySpeed, 0, fieldRelative);
 			}
-
-			m_swerve.driveAngle(xSpeed, ySpeed, angleToHold, fieldRelative);
-		}else{
-			m_swerve.driveAngle(xSpeed, ySpeed, 0, fieldRelative);
 		}
-
 	}
 }
