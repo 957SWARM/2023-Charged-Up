@@ -45,6 +45,8 @@ public class Robot extends TimedRobot {
 
 	private final SlewRateLimiter m_slewX = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_slewY = new SlewRateLimiter(3);
+	double angleToHold = 0;
+
 /* 
 	//BUTTONS
 	final int highFourBarPosition = 0;
@@ -57,8 +59,10 @@ public class Robot extends TimedRobot {
 
 	final int openClaw = 0;
 	final int closeClaw = 0;
+	
 */
-
+	final int holdAngle = 0;
+	boolean holdAngleSwitch = false;
 
 
 	//function for HDC
@@ -99,7 +103,16 @@ public class Robot extends TimedRobot {
 			speedVar = 0;
 			}
 		}
-			
+		
+		if(m_controller.getRawButtonReleased(holdAngle)){
+			if(holdAngleSwitch == true){
+				holdAngleSwitch = false;
+			}
+			else if(holdAngleSwitch == false){
+				holdAngleSwitch = true;
+			}
+		}
+		
 
 		//driveWithJoystick(true);
 
@@ -112,6 +125,7 @@ public class Robot extends TimedRobot {
 			driveWithJoystick(true);
 		}
 	}
+
 
 	private void driveWithJoystick(boolean fieldRelative) {
 		// Get the x speed. We are inverting this because Xbox controllers return
@@ -135,7 +149,26 @@ public class Robot extends TimedRobot {
 			-m_rotLimiter.calculate(MathUtil.applyDeadband(m_controller.getRightX(), 0.2))
 				* Drivetrain.kMaxAngularSpeed;
 
-		m_swerve.driveAngle(xSpeed, ySpeed, 0, fieldRelative);
+		//change angleToHold
+
+
+		if(holdAngleSwitch){
+			double x = m_controller.getRawAxis(4);//x axis
+			double y = m_controller.getRawAxis(5);//y axis
+
+			angleToHold = Math.atan(y * (1/x));
+
+			angleToHold = Math.toDegrees(angleToHold);
+
+			if(y < 0){
+				angleToHold = angleToHold + 180;
+			}
+
+			m_swerve.driveAngle(xSpeed, ySpeed, angleToHold, fieldRelative);
+		}else{
+			m_swerve.driveAngle(xSpeed, ySpeed, 0, fieldRelative);
+		}
+
 	}
 
 	public void robotPeriodic(){
