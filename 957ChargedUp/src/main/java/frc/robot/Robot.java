@@ -42,6 +42,9 @@ public class Robot extends TimedRobot {
 	private double speedMult = 1; 
 	final int changeSpeedButton = 1;
 	int speedVar = 0;
+
+	private final SlewRateLimiter m_slewX = new SlewRateLimiter(3);
+	private final SlewRateLimiter m_slewY = new SlewRateLimiter(3);
 /* 
 	//BUTTONS
 	final int highFourBarPosition = 0;
@@ -102,34 +105,10 @@ public class Robot extends TimedRobot {
 
 		if (m_controller.getRawButton(2)){
 			// Getting Distance
-			double distance_threshold = 1.5;
-			double desiredDistance = 20;
-			double alignment_threshold = 1.5;
-			double tx = limelight.getTx();
-			double distance = limelight.getDistance();
-			
-			double xSpeed = 0;
-			double ySpeed = 0;
+			trackAprilTag(0.1, 1.1);
 
-			// Distance Adjustment
-			if ( distance < desiredDistance - distance_threshold)
-				ySpeed = -.2;
-			else if ( distance > desiredDistance + distance_threshold) 
-				ySpeed = .2;
-			else
-				ySpeed = 0;
-
-			// Alignment
-			if ( tx < -alignment_threshold)
-				xSpeed = 0.2;
-			else if( tx > alignment_threshold) {
-				xSpeed = -0.2;
-			}
-			else{
-				xSpeed = 0;
-			}
-			m_swerve.drive(xSpeed, ySpeed, 0, true);
 		}else{
+			
 			driveWithJoystick(true);
 		}
 	}
@@ -158,4 +137,42 @@ public class Robot extends TimedRobot {
 
 		m_swerve.driveAngle(xSpeed, ySpeed, 0, fieldRelative);
 	}
+
+	public void robotPeriodic(){
+		//System.out.println(limelight.getAlignmentOffset());
+		//System.out.println("Distance: " + limelight.getDistance());
+	}
+
+	public void trackAprilTag(double threshold, double desiredDistance){
+		
+		double tx = limelight.getAlignmentOffset();
+		double distance = limelight.getDistance();
+		
+		double xSpeed = 0;
+		double ySpeed = 0;
+
+		// Distance Adjustment
+		if ( distance < desiredDistance - threshold){
+			ySpeed = m_slewY.calculate(-1) * 0.5;
+		}
+		else if ( distance > desiredDistance + threshold){
+			ySpeed = m_slewY.calculate(1) * 0.5;
+		}
+		else{
+			ySpeed = m_slewY.calculate(0) * 0.5;
+		}
+
+		// Alignment
+		if ( tx < - threshold){
+			xSpeed = m_slewX.calculate(1) * 0.5;
+		}
+		else if( tx > threshold) {
+			xSpeed = m_slewX.calculate(-1) * 0.5;
+		}
+		else{
+			xSpeed = m_slewX.calculate(0) * 0.5;
+		}
+		m_swerve.driveAngle(ySpeed, -xSpeed, 0, false);
+	}
 }
+

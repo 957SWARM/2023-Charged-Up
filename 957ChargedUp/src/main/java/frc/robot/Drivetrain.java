@@ -84,7 +84,7 @@
 		m_backLeft.setDesiredState(swerveModuleStates[2]);
 		m_backRight.setDesiredState(swerveModuleStates[3]);
 
-		System.out.println(swerveModuleStates[0].angle);
+		//System.out.println(swerveModuleStates[0].angle);
 	}
 
 
@@ -100,7 +100,7 @@
 		m_backLeft.setDesiredState(swerveModuleStates[2]);
 		m_backRight.setDesiredState(swerveModuleStates[3]);
 
-		System.out.println(swerveModuleStates[0].angle);
+		//System.out.println(swerveModuleStates[0].angle);
 	} 
 
 	/** Updates the field relative position of the robot. */
