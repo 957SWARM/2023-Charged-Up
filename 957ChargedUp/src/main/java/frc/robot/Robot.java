@@ -21,9 +21,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
-	private final XboxController m_controller = new XboxController(0);
 	private final Drivetrain m_swerve = new Drivetrain();
 	private final Limelight limelight = new Limelight();
 
@@ -31,8 +32,8 @@ public class Robot extends TimedRobot {
 	//Trajectory trajectory = new Trajectory();
 
 	HolonomicDriveController controller = new HolonomicDriveController(
-	new PIDController(1, 0, 0), new PIDController(1, 0, 0),
-	new ProfiledPIDController(1, 0, 0,
+		new PIDController(1, 0, 0), new PIDController(1, 0, 0),
+		new ProfiledPIDController(1, 0, 0,
 		new TrapezoidProfile.Constraints(6.28, 3.14)));
 	
 	// Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
@@ -40,28 +41,34 @@ public class Robot extends TimedRobot {
 	private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 	private double speedMult = 1; 
-	final int changeSpeedButton = 1;
 	int speedVar = 0;
 
 	double angleToHold = 0;
-
-/* 
-	//BUTTONS
-	final int highFourBarPosition = 0;
-	final int midFourBarPosition = 0;
-	final int lowFourBarPosition = 0;
-	final int pickupFourBarPosition = 0;
-	
-
-	final int deployFourBar = 0;
-
-	final int openClaw = 0;
-	final int closeClaw = 0;
-	
-*/
 	final int holdAngle = 0;
 	boolean holdAngleSwitch = false;
 
+	private static final String kJoystick = "Joystick";
+	private static final String kController = "Controller";
+	private String driveMode;
+	private final SendableChooser<String> driveChooser = new SendableChooser<>();
+
+	private final XboxController m_controller = new XboxController(0);
+
+	//BUTTONS
+	// m_controller
+	final int changeSpeedButton = 1; //A
+	final int highFourBarPosition = 0;
+	final int midFourBarPosition = 0;
+	final int lowFourBarPosition = 0;
+	final int pickupFourBarPosition = 0;	
+
+	//CONTROLLER DRIVE
+	int xAxisDrive = 0;
+	int yAxisDrive = 1;
+	int gTurnAxis = 4;
+	int clawToggle = 1;
+	int visionCone = 3;
+	int visionCube = 4;
 
 	//function for HDC
 	public void followTrajectory(double time, Trajectory trajectory){
@@ -69,8 +76,9 @@ public class Robot extends TimedRobot {
 		ChassisSpeeds adjustedSpeeds = controller.calculate(m_swerve.getPose(), goal, Rotation2d.fromDegrees(70.0));
 		m_swerve.drive(adjustedSpeeds.vxMetersPerSecond, adjustedSpeeds.vyMetersPerSecond, adjustedSpeeds.omegaRadiansPerSecond, true);
 	}
-/* 
+
 	public Trajectory getPath(String selectedAuto){
+		Trajectory trajectory = new Trajectory();
 		try {
 			Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(selectedAuto);
 			trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
@@ -79,12 +87,55 @@ public class Robot extends TimedRobot {
 		 }
 		return trajectory;
 	}
-*/
+
+	@Override
+	public void robotInit() {
+		driveChooser.setDefaultOption("Controller", kController);
+		driveChooser.addOption("Controller", kController);
+		driveChooser.addOption("Joystick", kJoystick);
+		SmartDashboard.putData("Selected: ", driveChooser);
+	}
+
+	@Override
+	public void robotPeriodic() {
+		
+		driveMode = driveChooser.getSelected();
+		System.out.println("Selected: " + driveMode);
+
+		switch (driveMode) {
+			case kJoystick:
+				xAxisDrive = 0;
+				yAxisDrive = 1;
+				gTurnAxis = 2;
+				clawToggle = 1;
+				visionCone = 3;
+				visionCube = 4;
+				break;
+
+			case kController:
+				xAxisDrive = 0;
+				yAxisDrive = 1;
+				gTurnAxis = 4;
+				clawToggle = 1;
+				visionCone = 3;
+				visionCube = 4;
+				break;
+		}
+	}
+
+	@Override
+	public void autonomousInit(){
+
+	}
+
 	@Override
 	public void autonomousPeriodic() {
 		driveWithJoystick(false);
 		m_swerve.updateOdometry();
 	}
+
+	@Override
+	public void teleopInit() {}
 
 	@Override
 	public void teleopPeriodic() {
@@ -111,7 +162,6 @@ public class Robot extends TimedRobot {
 			}
 		}
 		
-
 		//driveWithJoystick(true);
 
 		if (m_controller.getRawButton(2)){
@@ -177,14 +227,10 @@ public class Robot extends TimedRobot {
 
 		if(x > Math.abs(0.7) || y > Math.abs(0.7) ){
 			if(holdAngleSwitch){
-				
 
-				angleToHold = Math.atan(y * (1/x));
-				angleToHold = Math.toDegrees(angleToHold);
-
-				if(y < 0){
+				angleToHold = Math.toDegrees(Math.atan(y * (1/x)));
+				if(y < 0)
 					angleToHold = angleToHold + 180;
-				}
 
 				m_swerve.driveAngle(xSpeed, ySpeed, angleToHold, fieldRelative);
 			}else{
