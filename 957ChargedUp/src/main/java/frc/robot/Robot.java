@@ -217,11 +217,6 @@ public class Robot extends TimedRobot {
 		}
 	}
 
-	public void robotPeriodic(){
-		//System.out.println(limelight.getAlignmentOffset());
-		//System.out.println("Distance: " + limelight.getDistance());
-	}
-
 	public void trackAprilTag(double threshold, double desiredDistance){
 		
 		double tx = limelight.getAlignmentOffset();
