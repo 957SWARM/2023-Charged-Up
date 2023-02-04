@@ -31,7 +31,7 @@
 
 	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.839) * 6.28);
 	private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.556-0.25) * 6.28);
-	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.138+0.5) * 6.28);
+	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.826+0.5) * 6.28);
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
 	AHRS m_navx = new AHRS(Port.kMXP);
@@ -76,7 +76,6 @@
 
 	public void driveAngle(double xSpeed, double ySpeed, double angle, boolean fieldRelative){
 		double pidAngle = -visionPID.getOutput(m_navx.getAngle(), angle);
-
 		var swerveModuleStates =
 			m_kinematics.toSwerveModuleStates(
 				fieldRelative
@@ -118,6 +117,17 @@
 			m_backLeft.getPosition(),
 			m_backRight.getPosition()
 			});
+	}
+
+	public void resetOdometry() {
+		m_odometry.resetPosition(
+			m_navx.getRotation2d(), 			
+			new SwerveModulePosition[] {
+				m_frontLeft.getPosition(),
+				m_frontRight.getPosition(),
+				m_backLeft.getPosition(),
+				m_backRight.getPosition()},
+			new Pose2d());
 	}
 
 	public Pose2d getPose(){
