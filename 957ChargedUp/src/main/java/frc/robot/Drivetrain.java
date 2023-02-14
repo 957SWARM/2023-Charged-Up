@@ -7,17 +7,19 @@
 
 	import com.kauailabs.navx.frc.AHRS;
 
-	//import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.math.controller.PIDController;
+
+//import com.kauailabs.navx.frc.AHRS;
 
 	import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+	import edu.wpi.first.math.geometry.Rotation2d;
+	import edu.wpi.first.math.geometry.Translation2d;
 	import edu.wpi.first.math.kinematics.ChassisSpeeds;
 	import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 	import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 	import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.SPI.Port;
+	import edu.wpi.first.math.kinematics.SwerveModuleState;
+	import edu.wpi.first.wpilibj.SPI.Port;
 
 
 
@@ -37,6 +39,7 @@ import edu.wpi.first.wpilibj.SPI.Port;
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
 	AHRS m_navx = new AHRS(Port.kMXP);
+	PIDController tapePID = new PIDController(0.15, 0, 0);
 
     double v_vkp = 0.1;
     double v_vki = 0.;
@@ -147,4 +150,117 @@ import edu.wpi.first.wpilibj.SPI.Port;
 		m_backLeft.setDesiredState(swerveModuleStates[2]);
 		m_backRight.setDesiredState(swerveModuleStates[3]);
 	}
+	// driveMeters for april tags
+	public boolean realestDriveMeters(double meters, double speed, double threshold){
+		double realestMeters = 0;
+		if (meters >= 0){
+			drive(0, speed, 0, false);
+			realestMeters = meters - .1;
+		}
+		else{
+			drive(0, -speed, 0, false);
+			realestMeters = meters;
+		}
+		double xposition = m_odometry.getPoseMeters().getY();
+		System.out.println(Math.abs(meters) - Math.abs(xposition));
+		if (Math.abs(realestMeters) - Math.abs(xposition) < threshold){
+			drive(0, 0, 0, false);
+			return true;
+		}
+		return false;
+	}
+
+	// driveMeters for tape tracking
+	public boolean loserDriveMeters(double meters, double speed, double threshold){
+		if (meters >= 0){
+			drive(0, speed, 0, false);
+		}
+		else{
+			drive(0, -speed, 0, false);
+		}
+		double xposition = m_odometry.getPoseMeters().getY();
+		System.out.println(Math.abs(meters) - Math.abs(xposition));
+		if (Math.abs(meters) - Math.abs(xposition) < threshold){
+			drive(0, 0, 0, false);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean velocityChecker(double n, double s){
+		double frv = Math.abs(m_frontRight.getVelocity());
+		double flv = Math.abs(m_frontLeft.getVelocity());
+		double brv = Math.abs(m_backRight.getVelocity());
+		double blv = Math.abs(m_backLeft.getVelocity());
+
+		boolean isBelow = false;
+
+		if(frv < s/n){
+			isBelow = true;
+		}
+		if(flv < s/n){
+			isBelow = true;
+		}
+		if(brv < s/n){
+			isBelow = true;
+		}
+		if(blv < s/n){
+			isBelow = true;
+		}
+		return isBelow;
+	}
+
+	public boolean trackTapePID(double currentPosition, double maxSpeed, double threshold){
+		double motorOutput = tapePID.calculate(currentPosition, 0);
+
+		if(motorOutput > maxSpeed) {
+			motorOutput = maxSpeed;
+		}
+		if(motorOutput < -maxSpeed) {
+			motorOutput = -maxSpeed;
+		}
+
+		if(currentPosition < threshold && currentPosition > -threshold) {
+			drive(0, 0, 0, false);
+			return true;
+		}
+
+		drive(0, motorOutput, 0, false);	
+		return false;
+	}
+
+		// Hit wall variables (move to drive train)
+		int wallstate = 0;
+		double timer = 0;
+		double length = 0.5;
+		double speed = 0.7;
+		double n = 2;
+	
+		public boolean hitwall(){
+	
+		switch(wallstate){
+			case 0:
+	
+				driveAngle(speed, 0, 0, false);
+				timer += 0.02;
+				if(timer > length){
+					wallstate = 1;
+					return false;
+				}
+	
+			  break;
+			case 1:
+			
+				driveAngle(speed, 0, 0, false);
+				timer = 0;
+				if(velocityChecker(n, speed)){
+					wallstate = 0;
+					return true;
+				}
+	
+			  break;
+	
+			}
+			return false;
+		}
 }
