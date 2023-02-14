@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+ // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -32,14 +32,16 @@ import frc.robot.Constants.JoystickButtons;
 public class Robot extends TimedRobot {
 	private final Drivetrain m_swerve = new Drivetrain();
 	private final Limelight limelight = new Limelight();
+	private final Wrist m_wrist = new Wrist();
+	private final FourBar m_fourBar = new FourBar();
 
 	String autoExample = "pathplanner/generatedJSON/TestPath.wpilib.json";
 	Trajectory trajectory = new Trajectory();
 	double autonomousTimer = 0;
 
 	HolonomicDriveController controller = new HolonomicDriveController(
-		new PIDController(0, 0, 0), new PIDController(0, 0, 0),
-		new ProfiledPIDController(0, 0, 0,
+		new PIDController(0.032, 0, 0), new PIDController(-0.000, 0, 0),
+		new ProfiledPIDController(1, 0, 0,
 		new TrapezoidProfile.Constraints(1.5, 3)));
 	
 	// Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
@@ -69,7 +71,7 @@ public class Robot extends TimedRobot {
 	final int midFourBarPosition = 0;
 	final int lowFourBarPosition = 0;
 	final int pickupFourBarPosition = 0;	
-
+	final int clawButton = 0;
 
 	//CONTROLLER DRIVE
 	int xAxisDrive = 0;
@@ -81,15 +83,23 @@ public class Robot extends TimedRobot {
 	int shifter = 0;
 	int driveStyle = 0;
 
+	private final ButtonPanel m_buttonPanel = new ButtonPanel();
+
 	int var = 0;
+	
 
 	Trajectory currentPath;
 
 	//function for HDC
 	public void followTrajectory(double time, Trajectory trajectory){
 		Trajectory.State goal = trajectory.sample(time);
-		ChassisSpeeds adjustedSpeeds = controller.calculate(m_swerve.getPose(), goal, Rotation2d.fromDegrees(70.0));
-		m_swerve.drive(adjustedSpeeds.vxMetersPerSecond, adjustedSpeeds.vyMetersPerSecond, adjustedSpeeds.omegaRadiansPerSecond, false);
+		ChassisSpeeds adjustedSpeeds = controller.calculate(m_swerve.getPose(), goal, Rotation2d.fromDegrees(0));
+		if(time > trajectory.getTotalTimeSeconds()){
+			m_swerve.drive(0, 0, 0, false);
+		}
+		else{
+			m_swerve.autoDrive(adjustedSpeeds);
+		}
 	}
 
 	public Trajectory getPath(String selectedAuto){
@@ -117,28 +127,27 @@ public class Robot extends TimedRobot {
 		driveMode = driveChooser.getSelected();
 		switch(driveMode){
 			default:
-			xAxisDrive = ControllerButtons.xAxisDrive;
-			yAxisDrive = ControllerButtons.yAxisDrive;
-			gTurnAxis = ControllerButtons.gTurnAxis;
-			clawToggle = ControllerButtons.clawToggle;
-			visionCone = ControllerButtons.visionCone;
-			visionCube = ControllerButtons.visionCube;
-			shifter = ControllerButtons.shifter;	
-			driveStyle = ControllerButtons.driveStyle;
+			xAxisDrive = ControllerButtons.xAxisDrive; //0
+			yAxisDrive = ControllerButtons.yAxisDrive; //1
+			gTurnAxis = ControllerButtons.gTurnAxis;   //4
+			clawToggle = ControllerButtons.clawToggle; //1
+			visionCone = ControllerButtons.visionCone; //3
+			visionCube = ControllerButtons.visionCube; //4
+			shifter = ControllerButtons.shifter;	   //2
+			driveStyle = ControllerButtons.driveStyle; //8
 			break;
 
 			case kJoystick:
-			xAxisDrive = JoystickButtons.xAxisDrive;
-			yAxisDrive = JoystickButtons.yAxisDrive;
-			gTurnAxis = JoystickButtons.gTurnAxis;
-			clawToggle = JoystickButtons.clawToggle;
-			visionCone = JoystickButtons.visionCone;
-			visionCube = JoystickButtons.visionCube;
-			shifter = JoystickButtons.shifter;	
-			driveStyle = JoystickButtons.driveStyle;			
+			xAxisDrive = JoystickButtons.xAxisDrive; //0 
+			yAxisDrive = JoystickButtons.yAxisDrive; //1
+			gTurnAxis = JoystickButtons.gTurnAxis;   //2
+			clawToggle = JoystickButtons.clawToggle; //1
+			visionCone = JoystickButtons.visionCone; //3
+			visionCube = JoystickButtons.visionCube; //4
+			shifter = JoystickButtons.shifter;		 //12
+			driveStyle = JoystickButtons.driveStyle; //11	
 			break;
 		}
-
 
 		}
 
@@ -166,13 +175,13 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
+
 		m_swerve.updateOdometry();
-		
+
 
 		switch (var) {
 			case 0:
 				drive(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis), true);
-				System.out.print("reg drive");
 				if(m_controller.getRawButton(driveStyle))
 					var++;
 			break;
@@ -184,23 +193,41 @@ public class Robot extends TimedRobot {
 					break;
 
 			case 2:
-				driveAngle(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis) * 180, true);
-				System.out.print("not reg drive");
+				driveAngle(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), joyAngle(m_controller.getRawAxis(4), -m_controller.getRawAxis(5)), true);
 				if(m_controller.getRawButton(driveStyle))
 					var++;
 				break;
 			
 			case 3:
-				driveAngle(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis) * 180, true);
+				driveAngle(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), joyAngle(m_controller.getRawAxis(4), -m_controller.getRawAxis(5)), true);
 				if( !m_controller.getRawButton(driveStyle))
 				var = 0;
 				break;
 		}
 	
-
 		speedShift(m_controller.getRawButtonReleased(shifter));
-		
-		
+		//MECHANISM CODE BELOW HERE
+
+		if(m_buttonPanel.wristRetractPressed())
+			m_wrist.set(WristPositions.retract);
+		if(m_buttonPanel.wristScoreUpPressed())
+			m_wrist.set(WristPositions.scoreUp);
+		if(m_buttonPanel.wristScoreOutPressed())
+			m_wrist.set(WristPositions.scoreOut);
+		if(m_buttonPanel.wristGroundPressed())
+			m_wrist.set(WristPositions.ground);
+		m_wrist.run();
+
+		if(m_buttonPanel.armHighPressed())
+			m_fourBar.setLevel(MoveFourBars.high);
+		if(m_buttonPanel.armMidPressed())
+			m_fourBar.setLevel(MoveFourBars.medium);
+		if(m_buttonPanel.armSubPressed())
+			m_fourBar.setLevel(MoveFourBars.low);
+		if(m_buttonPanel.armGroundPressed())
+			m_fourBar.setLevel(MoveFourBars.pickup);
+		m_fourBar.run();
+
 	}
 
 		
@@ -257,24 +284,43 @@ public class Robot extends TimedRobot {
 		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(arr[0], 0.2));	
 		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(arr[1], 0.2));
 		
-		m_swerve.driveAngle(xSpeed * speedMult*3, ySpeed * speedMult*3, rot*6.28, fieldRelative);
+		m_swerve.driveAngle(-ySpeed * speedMult*3, -xSpeed * speedMult*3, -rot, fieldRelative);
 	}
 	
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative){
-		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.1));	
-		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.1));
+		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));	
+		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
 		rot = m_rotLimiter.calculate(MathUtil.applyDeadband(rot, 0.2));
 		m_swerve.drive(-ySpeed * speedMult*3, -xSpeed * speedMult*3, rot*6.28, fieldRelative);
 	}
 
 	public double joyAngle(double x, double y){
-		
+		double a;
+		double b;
+		double c;
+		double d;
+		double e;
+
 		if(0.7 < Math.abs(x) || 0.7 < Math.abs(y) ){
-			angleToHold = Math.toDegrees(Math.atan(y * (y/x)));
-			if(y < 0)
-				angleToHold = angleToHold + 180;	
-	
+			angleToHold = Math.toDegrees(Math.atan2(y, x));	
 		}
+		if(angleToHold < 0){
+			a = angleToHold;
+			b = angleToHold + 360;
+		}else{
+			b = angleToHold;
+			a = angleToHold - 360;
+		}
+		c = (m_swerve.m_navx.getAngle() - (m_swerve.m_navx.getAngle() % 360)) / 360;
+		d = (360 * c) + a;
+		e = (360 * c) + b;
+
+		if(Math.abs(m_swerve.m_navx.getAngle() - d) <= 180){
+			angleToHold = a;
+		}else{
+			angleToHold = b;
+		}
+		
 		return angleToHold;
 	
 	}

@@ -10,12 +10,14 @@
 	//import com.kauailabs.navx.frc.AHRS;
 
 	import edu.wpi.first.math.geometry.Pose2d;
-	import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 	import edu.wpi.first.math.kinematics.ChassisSpeeds;
 	import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 	import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 	import edu.wpi.first.math.kinematics.SwerveModulePosition;
-	import edu.wpi.first.wpilibj.SPI.Port;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.SPI.Port;
 
 
 
@@ -29,7 +31,7 @@
 	private final Translation2d m_backLeftLocation = new Translation2d(-0.3302, 0.3302);
 	private final Translation2d m_backRightLocation = new Translation2d(-0.3302, -0.3302);
 
-	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.839) * 6.28);
+	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.142) * 6.28);
 	private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.556-0.25) * 6.28);
 	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.826+0.5) * 6.28);
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
@@ -92,6 +94,7 @@
 
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+		System.out.println(m_odometry.getPoseMeters().getRotation());
 		var swerveModuleStates =
 			m_kinematics.toSwerveModuleStates(
 				fieldRelative
@@ -131,7 +134,17 @@
 	}
 
 	public Pose2d getPose(){
+		double x_pos = m_odometry.getPoseMeters().getX();
+		double y_pos = m_odometry.getPoseMeters().getY();
+		Rotation2d rot = m_odometry.getPoseMeters().getRotation();
 		return m_odometry.getPoseMeters();
 	}
 
+	public void autoDrive(ChassisSpeeds chassisSpeeds){
+		SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(chassisSpeeds);
+		m_frontLeft.setDesiredState(swerveModuleStates[0]);
+		m_frontRight.setDesiredState(swerveModuleStates[1]);
+		m_backLeft.setDesiredState(swerveModuleStates[2]);
+		m_backRight.setDesiredState(swerveModuleStates[3]);
+	}
 }

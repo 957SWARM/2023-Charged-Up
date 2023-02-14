@@ -16,12 +16,12 @@ public class FourBar {
     SparkMaxPIDController fourBarPid = fourBarMotor.getPIDController();
     RelativeEncoder fourBarEncoder = fourBarMotor.getEncoder();
 
-    CANSparkMax armMotor = new CANSparkMax(88888888, MotorType.kBrushless);
+    //CANSparkMax armMotor = new CANSparkMax(88888888, MotorType.kBrushless);
 
-    SparkMaxPIDController armPid = armMotor.getPIDController();
-    RelativeEncoder armEncoder = armMotor.getEncoder();
+    //SparkMaxPIDController armPid = armMotor.getPIDController();
+    //RelativeEncoder armEncoder = armMotor.getEncoder();
 
-    double targetArmPosition = 0;
+    //double targetArmPosition = 0;
     double targetBarPosition = 0;
 
 
@@ -38,9 +38,10 @@ public class FourBar {
         fourBarPid.setSmartMotionMaxAccel(FourBarPidConstants.barMaxAcc, 0);
 
 
-        armMotor.restoreFactoryDefaults();
-        armMotor.setIdleMode(IdleMode.kBrake);
+        //armMotor.restoreFactoryDefaults();
+        //armMotor.setIdleMode(IdleMode.kBrake);
 
+        /*
         armPid.setP(ArmPidConstants.kArmP);
         armPid.setI(ArmPidConstants.kArmI);
         armPid.setD(ArmPidConstants.kArmD);
@@ -48,23 +49,24 @@ public class FourBar {
         armPid.setOutputRange(ArmPidConstants.kArmMinOutput, ArmPidConstants.kArmMaxOutput);
         armPid.setSmartMotionMaxVelocity(ArmPidConstants.armMaxVel, 0);
         armPid.setSmartMotionMaxVelocity(ArmPidConstants.armMaxAcc, 0);
+        */
 
     }
     
     public void setLevel(MoveFourBars level) {
-	    targetArmPosition = level.armPosition();
+	    //targetArmPosition = level.armPosition();
         targetBarPosition = level.barPosition();
 	}
 
     public void run(){
-
+        /*
         if(targetArmPosition < 0.1){
             targetArmPosition = 0.1;
         }
         if(targetArmPosition > 100){
             targetArmPosition = 100;
         }
-
+        */
         if(targetBarPosition < 0.1){
             targetBarPosition = 0.1;
         }
@@ -72,7 +74,7 @@ public class FourBar {
             targetBarPosition = 100;
         }
     
-        armPid.setReference(targetArmPosition, ControlType.kSmartMotion);
+       // armPid.setReference(targetArmPosition, ControlType.kSmartMotion);
         fourBarPid.setReference(targetBarPosition, ControlType.kSmartMotion);
     }
 }
