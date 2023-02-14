@@ -7,18 +7,18 @@ public class ButtonPanel {
     private final Joystick controller2 = new Joystick(2);
     
     //buttons
-    final int wristRetract = 0;
-    final int wristScoreUp = 0;
-    final int wristScoreOut = 0;
-    final int wristScoreGround = 0;
+    final int wristRetract = 10;
+    final int wristScoreUp = 7;
+    final int wristScoreOut = 8;
+    final int wristScoreGround = 9;
 
-    final int armHigh = 0;
-    final int armMid = 0;
-    final int armGround = 0;
-    final int armSubStation = 0;
+    final int armHigh = 4;
+    final int armMid = 5;
+    final int armGround = 6;
+    final int armSubStation = 3;
 
-    final int blingCone = 0;
-    final int blingCube = 0;
+    final int blingCone = 2;
+    final int blingCube = 1;
     
 
     public boolean wristRetractPressed(){
