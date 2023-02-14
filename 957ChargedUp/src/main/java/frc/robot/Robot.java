@@ -34,6 +34,7 @@ public class Robot extends TimedRobot {
 	private final Limelight limelight = new Limelight();
 	private final Wrist m_wrist = new Wrist();
 	private final FourBar m_fourBar = new FourBar();
+	private final VisionSubsystem m_vision = new VisionSubsystem();
 
 	String autoExample = "pathplanner/generatedJSON/TestPath.wpilib.json";
 	Trajectory trajectory = new Trajectory();
@@ -86,6 +87,7 @@ public class Robot extends TimedRobot {
 	private final ButtonPanel m_buttonPanel = new ButtonPanel();
 
 	int var = 0;
+	int trackingVar = 0;
 	
 
 	Trajectory currentPath;
@@ -149,6 +151,9 @@ public class Robot extends TimedRobot {
 			break;
 		}
 
+		m_vision.maintainTX(limelight);
+
+
 		}
 
 	@Override
@@ -177,33 +182,49 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 
 		m_swerve.updateOdometry();
-
-
-		switch (var) {
+		
+		switch(trackingVar){
 			case 0:
-				drive(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis), true);
-				if(m_controller.getRawButton(driveStyle))
-					var++;
+				m_vision.resetCases();
+				driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
+				if(m_buttonPanel.visionConePressed())//cone
+					trackingVar = 1;
+				if(m_buttonPanel.visionCubePressed())//cube
+					trackingVar = 3;
+			break;
+
+			case 1://cone
+				driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
+				if(!m_buttonPanel.visionConePressed())//cone
+					trackingVar = 2;
 			break;
 			
-			case 1:
-				drive(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis), true);
-				if(! m_controller.getRawButton(driveStyle))
-					var++;
-					break;
+			case 2://cone
+				m_vision.TapeTracking(m_swerve, limelight);
+				if(m_buttonPanel.visionConePressed() || m_buttonPanel.visionCubePressed())
+					trackingVar = 5;
+			break;
 
-			case 2:
-				driveAngle(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), joyAngle(m_controller.getRawAxis(4), -m_controller.getRawAxis(5)), true);
-				if(m_controller.getRawButton(driveStyle))
-					var++;
-				break;
-			
-			case 3:
-				driveAngle(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), joyAngle(m_controller.getRawAxis(4), -m_controller.getRawAxis(5)), true);
-				if( !m_controller.getRawButton(driveStyle))
-				var = 0;
-				break;
+			case 3://cube
+				driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
+				if(!m_buttonPanel.visionCubePressed())
+					trackingVar = 4;
+			break;
+
+			case 4://cube
+				m_vision.AprilTagTracking(m_swerve, limelight);
+				if(m_buttonPanel.visionConePressed() || m_buttonPanel.visionCubePressed())
+					trackingVar = 5;
+			break;
+
+			case 5:
+				if(!m_buttonPanel.visionConePressed() && !m_buttonPanel.visionCubePressed())
+					trackingVar = 0;
+			break;
+
 		}
+
+		
 	
 		speedShift(m_controller.getRawButtonReleased(shifter));
 		//MECHANISM CODE BELOW HERE
@@ -221,11 +242,11 @@ public class Robot extends TimedRobot {
 		if(m_buttonPanel.armHighPressed())
 			m_fourBar.setLevel(MoveFourBars.high);
 		if(m_buttonPanel.armMidPressed())
-			m_fourBar.setLevel(MoveFourBars.medium);
+			m_fourBar.setLevel(MoveFourBars.mid);
 		if(m_buttonPanel.armSubPressed())
-			m_fourBar.setLevel(MoveFourBars.low);
+		m_fourBar.setLevel(MoveFourBars.substation);
 		if(m_buttonPanel.armGroundPressed())
-			m_fourBar.setLevel(MoveFourBars.pickup);
+			m_fourBar.setLevel(MoveFourBars.ground);
 		m_fourBar.run();
 
 	}
@@ -367,6 +388,35 @@ public class Robot extends TimedRobot {
 		deadZoneArray[0] = xAxis;
 		deadZoneArray[1] = yAxis;
 		return deadZoneArray;
+	}
+
+	public void driveMode(double x, double y, double rot){
+		switch (var) {
+			case 0:
+				drive(x, y, rot, true);
+				if(m_controller.getRawButton(driveStyle))
+					var++;
+			break;
+			
+			case 1:
+				drive(x, y, rot, true);
+				if(! m_controller.getRawButton(driveStyle))
+					var++;
+			break;
+
+			case 2:
+				driveAngle(x, y, rot, true);
+				if(m_controller.getRawButton(driveStyle))
+					var++;
+				break;
+			
+			case 3:
+				driveAngle(x, y, rot, true);
+				if( !m_controller.getRawButton(driveStyle))
+					var = 0;
+				break;
+		}
+
 	}
 }
 

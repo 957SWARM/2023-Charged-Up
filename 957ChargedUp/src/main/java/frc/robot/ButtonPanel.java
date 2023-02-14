@@ -8,18 +8,20 @@ public class ButtonPanel {
     
     //buttons
     final int wristRetract = 10;
-    final int wristScoreUp = 7;
+    final int wristScoreGround = 9;  
     final int wristScoreOut = 8;
-    final int wristScoreGround = 9;
+    final int wristScoreUp = 7;
 
+    final int armGround = 6;
     final int armHigh = 4;
     final int armMid = 5;
-    final int armGround = 6;
     final int armSubStation = 3;
 
     final int blingCone = 2;
     final int blingCube = 1;
-    
+
+    final int visionCone = 11;
+    final int visionCube = 12;    
 
     public boolean wristRetractPressed(){
         return controller1.getRawButton(wristRetract);
@@ -61,4 +63,11 @@ public class ButtonPanel {
         return controller1.getRawButton(blingCube);
     } 
 
+    public boolean visionConePressed(){
+        return controller1.getRawButton(visionCone);
+    }
+
+    public boolean visionCubePressed(){
+        return controller1.getRawButton(visionCube);
+    }
 }

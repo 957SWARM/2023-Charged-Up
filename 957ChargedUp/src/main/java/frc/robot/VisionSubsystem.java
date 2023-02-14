@@ -43,6 +43,7 @@ public class VisionSubsystem {
         switch(aprilTagCase){
 			//Case 0 - Get TX
 			case 0:
+				swerve.drive(0, 0, 0, false);
 				if (limelight.getTv() == 1){
 					ATsum += aprilTagTX;
 					ATruns += 1;

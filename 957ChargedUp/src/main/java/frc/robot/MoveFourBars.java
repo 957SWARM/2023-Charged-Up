@@ -2,9 +2,9 @@ package frc.robot;
 
 public enum MoveFourBars{
     //bar height levels
-    pickup(00, 00, "Pickup Position"), 
-    low(0.1, 0.0, "Low Position"), 
-    medium(11, 111, "Medium Position"), 
+    substation(00, 00, "Substation Position"), 
+    ground(0.1, 0.0, "Ground Position"), 
+    mid(11, 111, "Mid Position"), 
     high(22, 222, "High Position");
     
     private final double armTargetSetpoint;
