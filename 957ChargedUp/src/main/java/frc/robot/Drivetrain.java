@@ -33,7 +33,7 @@ import edu.wpi.first.math.controller.PIDController;
 	private final Translation2d m_backLeftLocation = new Translation2d(-0.3302, 0.3302);
 	private final Translation2d m_backRightLocation = new Translation2d(-0.3302, -0.3302);
 
-	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.142) * 6.28);
+	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.304) * 6.28);
 	private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.556-0.25) * 6.28);
 	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.826+0.5) * 6.28);
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);

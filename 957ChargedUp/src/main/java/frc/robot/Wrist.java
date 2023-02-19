@@ -1,41 +1,61 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
-import edu.wpi.first.math.controller.PIDController;
+import com.revrobotics.SparkMaxPIDController;
+
+import frc.robot.Constants.FourBarPidConstants;
 
 public class Wrist{
 
-    CANSparkMax m_wristMotor = new CANSparkMax(0, MotorType.kBrushless);
+    CANSparkMax m_wristMotor = new CANSparkMax(10, MotorType.kBrushless);
+    
     SparkMaxPIDController m_wristPIDController = m_wristMotor.getPIDController();
-    AbsoluteEncoder m_wristEncoder;
+    RelativeEncoder wristEncoder = m_wristMotor.getEncoder();
+
+    
     double targetPosition = 0;
-    double defaultPosition = 0;
+    IdleMode currentIdleMode = IdleMode.kCoast;
 
     public Wrist(){
         m_wristMotor.restoreFactoryDefaults();
-        m_wristPIDController.setFeedbackDevice(m_wristEncoder);
-        m_wristEncoder = m_wristMotor.getAbsoluteEncoder(Type.kDutyCycle);
+        wristEncoder = m_wristMotor.getEncoder();
 
-        m_wristPIDController.setP(0);
+        m_wristMotor.setSmartCurrentLimit(30);
+
+        m_wristPIDController.setP(0.75e-3);
         m_wristPIDController.setI(0);
         m_wristPIDController.setD(0);
+        m_wristPIDController.setFF(0.000156);
+        m_wristPIDController.setOutputRange(-1, 1);
+        m_wristPIDController.setSmartMotionMaxVelocity(1000, 0);
+        m_wristPIDController.setSmartMotionMaxAccel(1000, 0);
 
-        m_wristPIDController.setPositionPIDWrappingEnabled(true);
+
+    }
+
+    public double calculateFF(double encoderPosition){
+        double angle = ((encoderPosition /20) * 360) + 35;
+        double combinedArm = 1200;
+
+        double motorOhms = 36/1000;
+        double motorTorque = 23;
+        double motorStallCurrent = 105;
+
+        double gearbox = 20;
+        double Kt = (motorTorque/motorStallCurrent);
+
+        double kF = -( (combinedArm * motorOhms) / (Kt * gearbox) * Math.cos(Math.toRadians(angle)));
+
+        return kF;
     }
 
     public void set(WristPositions position){
        targetPosition = position.wristPosition();
     }
     public void run(){
-        m_wristPIDController.setReference(targetPosition + defaultPosition, CANSparkMax.ControlType.kPosition);
+        m_wristPIDController.setReference(targetPosition, CANSparkMax.ControlType.kSmartMotion, 0, calculateFF(wristEncoder.getPosition()));
     }
 }

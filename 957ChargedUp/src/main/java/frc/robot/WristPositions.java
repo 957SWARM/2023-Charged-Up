@@ -1,10 +1,10 @@
 package frc.robot;
 public enum WristPositions {
 
-    retract(0, "retract"),
-    scoreUp(0, "scoreUp"),
-    scoreOut(0, "scoreOut"),
-    ground(0,"Ground");
+    retract(0.1, "retract"),
+    scoreUp(2.5, "scoreUp"),
+    scoreOut(7, "scoreOut"),
+    ground(9,"Ground");
 
     private final double wristTargetSetpoint;
     private final String m_identifer;

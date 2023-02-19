@@ -142,21 +142,10 @@ public final class Constants {
     public static final double kFourBarFF = 0.000156; 
     public static final double kFourBarMinOutput = -1;
     public static final double kFourBarMaxOutput = 1;
-    public static final double barMaxVel = 2000; 
-    public static final double barMaxAcc = 1500;
+    public static final double barMaxVel = 800; 
+    public static final double barMaxAcc = 1700;
   }
   
-  public static final class ArmPidConstants{
-	  public static final double kArmP = 5e-5; 
-    public static final double kArmI = 1e-6;
-    public static final double kArmD = 0;
-    public static final double kArmFF = 0.000156; 
-    public static final double kArmMinOutput = -1;
-    public static final double kArmMaxOutput = 1;
-    public static final double armMaxVel = 2000; 
-    public static final double armMaxAcc = 1500;
-  }
-
   public static final class JoystickButtons{
     public static final int xAxisDrive = 0;
     public static final int yAxisDrive = 1;
@@ -177,5 +166,7 @@ public final class Constants {
     public static final int visionCube = 4;
     public static final int shifter = 2;	
     public static final int driveStyle = 8;
+    public static final int clawIntake = 5;
+    public static final int clawOuttake = 6;
   }
 }

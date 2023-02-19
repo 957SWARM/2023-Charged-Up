@@ -7,11 +7,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
-import frc.robot.Constants.ArmPidConstants;
 import frc.robot.Constants.FourBarPidConstants;
 
 public class FourBar {
-    CANSparkMax fourBarMotor = new CANSparkMax(9999999, MotorType.kBrushless);
+    CANSparkMax fourBarMotor = new CANSparkMax(9, MotorType.kBrushless);
     
     SparkMaxPIDController fourBarPid = fourBarMotor.getPIDController();
     RelativeEncoder fourBarEncoder = fourBarMotor.getEncoder();
@@ -23,7 +22,7 @@ public class FourBar {
 
     //double targetArmPosition = 0;
     double targetBarPosition = 0;
-
+    IdleMode currentIdleMode = IdleMode.kCoast;
 
     public FourBar(){        
         fourBarMotor.restoreFactoryDefaults();
@@ -37,6 +36,7 @@ public class FourBar {
         fourBarPid.setSmartMotionMaxVelocity(FourBarPidConstants.barMaxVel, 0);
         fourBarPid.setSmartMotionMaxAccel(FourBarPidConstants.barMaxAcc, 0);
 
+        fourBarMotor.setSmartCurrentLimit(30);
 
         //armMotor.restoreFactoryDefaults();
         //armMotor.setIdleMode(IdleMode.kBrake);
@@ -67,13 +67,22 @@ public class FourBar {
             targetArmPosition = 100;
         }
         */
-        if(targetBarPosition < 0.1){
-            targetBarPosition = 0.1;
+        if(targetBarPosition < 0){
+            targetBarPosition = 0;
         }
         if(targetBarPosition > 100){
             targetBarPosition = 100;
         }
-    
+        if(targetBarPosition == 0 && fourBarEncoder.getPosition() < 3){
+            fourBarMotor.set(0);
+           // if(fourBarMotor.getIdleMode() != IdleMode.kBrake){
+             //   fourBarMotor.setIdleMode(IdleMode.kBrake);
+           // }
+            return;
+        }
+        if(fourBarMotor.getIdleMode() != IdleMode.kCoast){
+            fourBarMotor.setIdleMode(IdleMode.kCoast);
+        }
        // armPid.setReference(targetArmPosition, ControlType.kSmartMotion);
         fourBarPid.setReference(targetBarPosition, ControlType.kSmartMotion);
     }

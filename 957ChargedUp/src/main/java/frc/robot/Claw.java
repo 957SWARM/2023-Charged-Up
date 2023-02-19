@@ -1,9 +1,11 @@
 package frc.robot;
 
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -11,14 +13,18 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
 public class Claw {
 
-    DoubleSolenoid clawDoubleSolenoid = new DoubleSolenoid(5555, PneumaticsModuleType.CTREPCM, 0, 1);
-    TalonSRX clawMain = new TalonSRX(111);
-    TalonSRX clawFollower = new TalonSRX(2222);
+    DoubleSolenoid clawDoubleSolenoid = new DoubleSolenoid(14, PneumaticsModuleType.REVPH, 0, 1);
+    TalonSRX clawMain = new TalonSRX(11);
+    TalonSRX clawFollower = new TalonSRX(12);
     DigitalInput m_limitSwitch = new DigitalInput(0);
+
 
     public Claw(){
         clawFollower.follow(clawMain);
-        clawFollower.getInverted();
+        clawFollower.setInverted(true);
+        clawMain.setNeutralMode(NeutralMode.Brake);
+        clawFollower.setNeutralMode(NeutralMode.Brake);
+
     }
     
     public void coneMode(){
@@ -31,14 +37,14 @@ public class Claw {
     }
 
     public void clawIntake(double speed){
-        if(!m_limitSwitch.get()){
+        if(m_limitSwitch.get()){
             clawMain.set(TalonSRXControlMode.PercentOutput, -speed);
         }else{
             clawStop();
         }
     } 
 
-    public void clawOutake(double speed){
+    public void clawOuttake(double speed){
         clawMain.set(TalonSRXControlMode.PercentOutput, speed);
     }
     
