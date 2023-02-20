@@ -39,6 +39,8 @@ import edu.wpi.first.math.controller.PIDController;
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
 	AHRS m_navx = new AHRS(Port.kMXP);
+	PIDController ATXPID = new PIDController(0.15, 0, 0);
+	PIDController ATYPID = new PIDController(0.15, 0, 0);
 	PIDController tapePID = new PIDController(0.15, 0, 0);
 
     double v_vkp = 0.1;
@@ -209,7 +211,39 @@ import edu.wpi.first.math.controller.PIDController;
 		}
 		return isBelow;
 	}
+	//Drive to position
+	public boolean driveToPosition(double targetPositionX, double targetPositionY, double maxSpeed, double threshold){
+		double motorOutputX = ATXPID.calculate(m_odometry.getPoseMeters().getX(), targetPositionX);
+		double motorOutputY = ATYPID.calculate(m_odometry.getPoseMeters().getY(), targetPositionY);
 
+		if(motorOutputX > maxSpeed) {
+			motorOutputX = maxSpeed;
+		}
+		if(motorOutputX < -maxSpeed) {
+			motorOutputX = -maxSpeed;
+		}
+		if(motorOutputY > maxSpeed) {
+			motorOutputY = maxSpeed;
+		}
+		if(motorOutputY < -maxSpeed) {
+			motorOutputY = -maxSpeed;
+		}
+
+		boolean x_condition = m_odometry.getPoseMeters().getX() < threshold && m_odometry.getPoseMeters().getX() > -threshold;
+		boolean y_condition = m_odometry.getPoseMeters().getY() < threshold && m_odometry.getPoseMeters().getY() > -threshold;
+
+		if(x_condition && y_condition) {
+			drive(0, 0, 0, false);
+			return true;
+		}
+
+		drive(-motorOutputY, motorOutputY, 0, false);
+		return false;
+	}
+	
+	
+	
+	//Tape PID
 	public boolean trackTapePID(double currentPosition, double maxSpeed, double threshold){
 		double motorOutput = tapePID.calculate(currentPosition, 0);
 

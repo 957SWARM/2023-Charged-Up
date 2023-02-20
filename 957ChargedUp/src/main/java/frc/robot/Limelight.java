@@ -114,5 +114,10 @@ double [] botpose = table.getEntry("botpose").getDoubleArray(new double[]{});
     double tx = campose[0];
     return tx;
   }
+  public double getDistanceOffset(){
+    campose = table.getEntry("campose").getDoubleArray(new double[]{0,0,0,0,0,0});
+    double ty = campose[2];
+    return ty;
+  }
 
 }
