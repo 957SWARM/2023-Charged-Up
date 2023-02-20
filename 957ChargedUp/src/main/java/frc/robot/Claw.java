@@ -44,8 +44,8 @@ public class Claw {
         }
     } 
 
-    public void clawOuttake(double speed){
-        clawMain.set(TalonSRXControlMode.PercentOutput, speed);
+    public void clawOuttake(ShooterSpeed speed){
+        clawMain.set(TalonSRXControlMode.PercentOutput, speed.speed());
     }
     
     public void clawStop(){
