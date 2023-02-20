@@ -63,6 +63,9 @@ public class Robot extends TimedRobot {
 	final int holdAngle = 0;
 	boolean holdAngleSwitch = false;
 
+	double shooterSpeed = .5;
+
+
 	private final Joystick m_controller = new Joystick(0);
 
 	private static final String kJoystick = "Joystick";
@@ -78,7 +81,9 @@ public class Robot extends TimedRobot {
 	int shifter = 0;
 	int driveStyle = 0;
 	int clawIntake = 0;
-	int clawOuttake;
+	int clawOuttake = 0;
+	int ejectSpeed = 0;
+	int ejectSpeedFast = 0;
 
 	private final ButtonPanel m_buttonPanel = new ButtonPanel();
 
@@ -134,6 +139,8 @@ public class Robot extends TimedRobot {
 			driveStyle = ControllerButtons.driveStyle; //8
 			clawIntake = ControllerButtons.clawIntake; //5
 			clawOuttake = ControllerButtons.clawOuttake; //6
+			ejectSpeed = 3; //X
+			ejectSpeedFast = 4; //Y
 			break;
 
 			/* 
@@ -180,13 +187,18 @@ public class Robot extends TimedRobot {
 
 		m_swerve.updateOdometry();
 		speedShift(m_controller.getRawButtonReleased(shifter));
-		driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
+		driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), -m_controller.getRawAxis(gTurnAxis));
+
+		if(m_controller.getRawButton(3))
+			shooterSpeed = .7;
+		if(m_controller.getRawButton(4))
+			shooterSpeed = .1;
 
 
 		if(m_controller.getRawButton(clawIntake)){
 			m_claw.clawIntake(.5);
 		}else if(m_controller.getRawButton(clawOuttake)){
-			m_claw.clawOuttake(.5);
+			m_claw.clawOuttake(shooterSpeed);
 		}else{
 			m_claw.clawStop();
 		}
@@ -283,7 +295,7 @@ public class Robot extends TimedRobot {
 		m_fourBar.setLevel(MoveFourBars.substation);
 		if(m_buttonPanel.armGroundPressed())
 			m_fourBar.setLevel(MoveFourBars.ground);
-		m_fourBar.run();
+		//m_fourBar.run();
 
 	}
 

@@ -142,7 +142,7 @@ public final class Constants {
     public static final double kFourBarFF = 0.000156; 
     public static final double kFourBarMinOutput = -1;
     public static final double kFourBarMaxOutput = 1;
-    public static final double barMaxVel = 800; 
+    public static final double barMaxVel = 1200; 
     public static final double barMaxAcc = 1700;
   }
   

@@ -8,11 +8,11 @@ public class ButtonPanel {
     
     //buttons
     final int wristRetract = 10;
-    final int wristScoreGround = 9;  
+    final int wristScoreGround = 7;
     final int wristScoreOut = 8;
-    final int wristScoreUp = 7;
+    final int wristScoreUp = 9;
 
-    final int armGround = 6;
+    final int armGround = 6; 
     final int armHigh = 4;
     final int armMid = 5;
     final int armSubStation = 3;
