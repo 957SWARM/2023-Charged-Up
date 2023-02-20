@@ -63,7 +63,7 @@ public class Robot extends TimedRobot {
 	final int holdAngle = 0;
 	boolean holdAngleSwitch = false;
 
-	double shooterSpeed = .5;
+	ShooterSpeed targetShooterSpeed = ShooterSpeed.place;
 
 
 	private final Joystick m_controller = new Joystick(0);
@@ -190,15 +190,15 @@ public class Robot extends TimedRobot {
 		driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive), -m_controller.getRawAxis(gTurnAxis));
 
 		if(m_controller.getRawButton(3))
-			shooterSpeed = .7;
+			targetShooterSpeed = ShooterSpeed.teleopEject;
 		if(m_controller.getRawButton(4))
-			shooterSpeed = .1;
+			targetShooterSpeed = ShooterSpeed.place;
 
 
 		if(m_controller.getRawButton(clawIntake)){
 			m_claw.clawIntake(.5);
 		}else if(m_controller.getRawButton(clawOuttake)){
-			m_claw.clawOuttake(shooterSpeed);
+			m_claw.clawOuttake(targetShooterSpeed);
 		}else{
 			m_claw.clawStop();
 		}
