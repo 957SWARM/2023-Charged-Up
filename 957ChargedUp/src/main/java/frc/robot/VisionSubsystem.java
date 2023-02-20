@@ -30,6 +30,7 @@ public class VisionSubsystem {
 	public double MAX_TIME = 0.3;
 	public double lockOnTimer = 0;
 	public double[] cubePosition;
+	double manipulateCubeTimer = 0;
 
     // Constants
     // limelight .178 meters to the left of robot's center
@@ -52,6 +53,7 @@ public class VisionSubsystem {
     public void resetCases(){
         aprilTagCase = 0;
         retroTapeCase = 0;
+		cubeCase = 0;
     }
 	
     public boolean AprilTagTracking(Drivetrain swerve, Limelight limelight){
@@ -151,7 +153,7 @@ public class VisionSubsystem {
 		return new double[] {Double.MAX_VALUE, Double.MAX_VALUE};
 	}
 
-	public boolean manipulateCubes(Drivetrain swerve, Limelight limelight, Wrist wrist, WristPositions wristPosition, Claw claw){
+	public boolean manipulateCubes(Drivetrain swerve, Limelight limelight, Wrist wrist, WristPositions wristPosition, Claw claw, ShooterSpeed shooterSpeed){
 		switch(cubeCase){
 
 			case 0:
@@ -165,17 +167,22 @@ public class VisionSubsystem {
 			case 1:
 				if(swerve.driveToPosition(cubePosition[0], cubePosition[1], 0.2, 0.05)){
 					cubeCase = 2;
+					claw.clawOuttake(shooterSpeed);
 				}
 			break;
 
 			case 2:
-
+				if(manipulateCubeTimer > 0.5){
+					cubeCase = 0;
+					claw.clawStop();
+					return true;
+				}
+				manipulateCubeTimer += 0.02;
 			break;
+			
 
-			case 3:
-
-			break;
 		}
+		return false;
 	}
 
 }
