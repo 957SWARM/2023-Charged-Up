@@ -4,8 +4,8 @@ public enum MoveFourBars{
     //bar height levels
     substation(15, "Substation Position"), 
     ground( 0.1, "Ground Position"), 
-    mid( 15, "Mid Position"), 
-    high(31, "High Position");
+    mid( 30, "Mid Position"), 
+    high(46, "High Position");
     
     private final double barTargetSetpoint;
     private final String m_identifier;

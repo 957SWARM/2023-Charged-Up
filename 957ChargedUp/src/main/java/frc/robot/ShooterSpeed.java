@@ -1,10 +1,11 @@
 package frc.robot;
 public enum ShooterSpeed {
 
-    place(0.1  , "place"),
+    placeCube(0.2  , "place cube"),
+    placeCone(0.6, "place cone"),
     teleopEject(0.7 , "Teleop Eject"),
-    midCube(0, "Mid Cube"),
-    highCube(0, "High Cube");
+    midCube(.5, "Mid Cube"),
+    highCube(.7, "High Cube");
 
     private final double speed;
     private final String m_identifer;

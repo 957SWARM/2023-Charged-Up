@@ -2,13 +2,13 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.814307485757829,
-        "y": 0.45807177328640375
+        "x": 1.798799847599696,
+        "y": 2.75
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.814307485757829,
-        "y": 0.45807177328640375
+        "x": 4.289972465226253,
+        "y": 2.75
       },
       "holonomicAngle": 0,
       "isReversal": false,
@@ -16,20 +16,24 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
+        "names": [
+          "extendArm",
+          "extendWrist",
+          "outtake"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "before",
         "waitTime": 0
       }
     },
     {
       "anchorPoint": {
-        "x": 6.280507275300264,
-        "y": 0.46
+        "x": 6.071352976039285,
+        "y": 2.75
       },
       "prevControl": {
-        "x": 5.280507275300264,
-        "y": 0.46
+        "x": 5.444464740374857,
+        "y": 2.75
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -48,5 +52,14 @@
   "maxVelocity": 1.5,
   "maxAcceleration": null,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 0.01818181818181818,
+      "names": [
+        "retractArm",
+        "retractWrist",
+        "stopIntake"
+      ]
+    }
+  ]
 }

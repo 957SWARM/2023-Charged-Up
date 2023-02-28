@@ -92,12 +92,10 @@ import edu.wpi.first.math.controller.PIDController;
 		m_backLeft.setDesiredState(swerveModuleStates[2]);
 		m_backRight.setDesiredState(swerveModuleStates[3]);
 
-		//System.out.println(swerveModuleStates[0].angle);
 	}
 
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-		System.out.println(m_odometry.getPoseMeters().getRotation());
 		var swerveModuleStates =
 			m_kinematics.toSwerveModuleStates(
 				fieldRelative
@@ -109,7 +107,6 @@ import edu.wpi.first.math.controller.PIDController;
 		m_backLeft.setDesiredState(swerveModuleStates[2]);
 		m_backRight.setDesiredState(swerveModuleStates[3]);
 
-		//System.out.println(swerveModuleStates[0].angle);
 	} 
 
 
@@ -162,7 +159,7 @@ import edu.wpi.first.math.controller.PIDController;
 			realestMeters = meters;
 		}
 		double xposition = m_odometry.getPoseMeters().getY();
-		System.out.println(Math.abs(meters) - Math.abs(xposition));
+		//System.out.println(Math.abs(meters) - Math.abs(xposition));
 		if (Math.abs(realestMeters) - Math.abs(xposition) < threshold){
 			drive(0, 0, 0, false);
 			return true;
@@ -179,7 +176,7 @@ import edu.wpi.first.math.controller.PIDController;
 			drive(0, -speed, 0, false);
 		}
 		double xposition = m_odometry.getPoseMeters().getY();
-		System.out.println(Math.abs(meters) - Math.abs(xposition));
+		//System.out.println(Math.abs(meters) - Math.abs(xposition));
 		if (Math.abs(meters) - Math.abs(xposition) < threshold){
 			drive(0, 0, 0, false);
 			return true;
