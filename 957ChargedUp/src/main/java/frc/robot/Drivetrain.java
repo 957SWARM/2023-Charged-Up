@@ -39,8 +39,8 @@ import edu.wpi.first.math.controller.PIDController;
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
 	AHRS m_navx = new AHRS(Port.kMXP);
-	PIDController ATXPID = new PIDController(0.15, 0, 0);
-	PIDController ATYPID = new PIDController(0.15, 0, 0);
+	PIDController ATXPID = new PIDController(1, 0, 0);
+	PIDController ATYPID = new PIDController(1, 0, 0);
 	PIDController tapePID = new PIDController(0.15, 0, 0);
 
     double v_vkp = 0.1;
@@ -99,7 +99,6 @@ import edu.wpi.first.math.controller.PIDController;
 
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-		System.out.println(m_odometry.getPoseMeters().getRotation());
 		var swerveModuleStates =
 			m_kinematics.toSwerveModuleStates(
 				fieldRelative
@@ -229,15 +228,18 @@ import edu.wpi.first.math.controller.PIDController;
 			motorOutputY = -maxSpeed;
 		}
 
-		boolean x_condition = m_odometry.getPoseMeters().getX() < threshold && m_odometry.getPoseMeters().getX() > -threshold;
-		boolean y_condition = m_odometry.getPoseMeters().getY() < threshold && m_odometry.getPoseMeters().getY() > -threshold;
+		boolean x_condition = Math.abs(targetPositionX - m_odometry.getPoseMeters().getX()) < threshold;
+		boolean y_condition = Math.abs(targetPositionY - m_odometry.getPoseMeters().getY()) < threshold;
 
 		if(x_condition && y_condition) {
 			drive(0, 0, 0, false);
 			return true;
 		}
 
-		drive(-motorOutputY, motorOutputY, 0, false);
+		drive(motorOutputX, motorOutputY, 0, false);
+		System.out.println("X is: " + m_odometry.getPoseMeters().getX());
+		// System.out.println("Y is: " + m_odometry.getPoseMeters().getY());
+
 		return false;
 	}
 	
