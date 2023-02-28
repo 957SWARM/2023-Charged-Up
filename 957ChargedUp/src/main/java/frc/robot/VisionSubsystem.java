@@ -22,14 +22,12 @@ public class VisionSubsystem {
 	double RTruns = 0;
 	double RTavgTX = 0;
 
-	double ATXruns = 0;
-	double ATYruns = 0;
 	double ATXsum = 0;
 	double ATYsum = 0;
 
 	public double MAX_TIME = 0.3;
 	public double lockOnTimer = 0;
-	public double[] cubePosition;
+	public double[] cubePosition = {0, 0};
 	double manipulateCubeTimer = 0;
 
     // Constants
@@ -121,20 +119,20 @@ public class VisionSubsystem {
         return false;
     }
 
-	public double[] lockOnApriltag(Drivetrain swerve, Limelight limelight, double a){
+	public boolean lockOnApriltag(Drivetrain swerve, Limelight limelight, double a){
 
 		swerve.drive(0, 0, 0, false);
 
 		if(lockOnTimer > MAX_TIME) {
-
 			if (limelight.getTv() == 1){
-				ATXsum  += 1;
-				ATYsum  += 1;
-				ATXruns += aprilTagTX;
-				ATYruns += aprilTagTY;
-				if(ATXruns == 5){
+				ATruns  += 1;
+				ATXsum += limelight.campose[0];
+				ATYsum += limelight.campose[2];
+				if(ATruns == 5){
 					swerve.resetOdometry();
-					return new double[] {-ATXsum / ATYruns, -ATYsum / ATXruns + a};
+					cubePosition[0] = ATXsum / ATruns;
+					cubePosition[1] = ATYsum / ATruns + a;
+					return true;
 				}
 			}
 			
@@ -142,36 +140,40 @@ public class VisionSubsystem {
 
 			ATXsum = 0;
 			ATYsum = 0;
-			ATXruns = 0;
-			ATYruns = 0;
+			ATruns = 0;
 		}
 
-		if(swerve.velocityChecker(3, 0.5)) {
+		if(true) {
 			lockOnTimer += 0.02;
 		}
 
-		return new double[] {Double.MAX_VALUE, Double.MAX_VALUE};
+		return false;
 	}
 
 	public boolean manipulateCubes(Drivetrain swerve, Limelight limelight, Wrist wrist, WristPositions wristPosition, Claw claw, ShooterSpeed shooterSpeed){
 		switch(cubeCase){
 
 			case 0:
-				cubePosition = lockOnApriltag(swerve, limelight, 1.5);
-				if(cubePosition == new double[] {Double.MAX_VALUE, Double.MAX_VALUE}){
+				System.out.println("Case 0");
+				manipulateCubeTimer = 0;
+				if(lockOnApriltag(swerve, limelight, .75)){	
 					wrist.set(wristPosition);
 					cubeCase = 1;
 				}
 			break;
 				
 			case 1:
-				if(swerve.driveToPosition(cubePosition[0], cubePosition[1], 0.2, 0.05)){
+				lockOnTimer = 0;
+				if(swerve.driveToPosition(cubePosition[0], 0, 0.2, 0.05)){
 					cubeCase = 2;
 					claw.clawOuttake(shooterSpeed);
 				}
+			
+				System.out.println(cubePosition[0] + ", " + cubePosition[1]);
 			break;
 
 			case 2:
+				System.out.println("Case 2");
 				if(manipulateCubeTimer > 0.5){
 					cubeCase = 0;
 					claw.clawStop();
