@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.Constants;
 public enum ShooterSpeed {
 
     placeCube(0.2  , "place cube"),

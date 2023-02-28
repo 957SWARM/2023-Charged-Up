@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.Constants;
 public enum WristPositions {
 
     retract(0.1  , "retract"),

@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.Constants;
 
 public enum MoveFourBars{
     //bar height levels
