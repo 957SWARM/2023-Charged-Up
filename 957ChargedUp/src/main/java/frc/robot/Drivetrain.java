@@ -4,7 +4,7 @@
 
 	package frc.robot;
 
-
+// :)
 	import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -20,7 +20,7 @@ import edu.wpi.first.math.controller.PIDController;
 	import edu.wpi.first.math.kinematics.SwerveModulePosition;
 	import edu.wpi.first.math.kinematics.SwerveModuleState;
 	import edu.wpi.first.wpilibj.SPI.Port;
-
+import frc.robot.Constants.MiniPID;
 
 
 	/** Represents a swerve drive style drivetrain. */
@@ -38,6 +38,7 @@ import edu.wpi.first.math.controller.PIDController;
 	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.826+0.5) * 6.28);
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
+	double smiley = 2;
 	AHRS m_navx = new AHRS(Port.kMXP);
 	PIDController ATXPID = new PIDController(1, 0, 0);
 	PIDController ATYPID = new PIDController(1, 0, 0);
