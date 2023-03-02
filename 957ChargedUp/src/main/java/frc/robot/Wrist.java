@@ -7,7 +7,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
-import frc.robot.Constants.FourBarPidConstants;
+import frc.robot.Constants.WristPositions;
 
 public class Wrist{
 

@@ -6,7 +6,6 @@ package frc.robot;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -24,8 +23,10 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.ButtonPanel;
+import frc.robot.Constants.MoveFourBars;
+import frc.robot.Constants.ShooterSpeed;
+import frc.robot.Constants.WristPositions;
 
 public class Robot extends TimedRobot {
 	private final Drivetrain m_swerve = new Drivetrain();
@@ -313,7 +314,6 @@ public class Robot extends TimedRobot {
 		 * }
 		 * 
 		 * speedShift(m_controller.getRawButtonReleased(shifter));
-		 * //MECHANISM CODE BELOW HERE
 		 * 
 		 * 
 		 * 

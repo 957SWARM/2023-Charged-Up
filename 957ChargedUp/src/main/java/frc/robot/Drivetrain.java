@@ -4,7 +4,7 @@
 
 	package frc.robot;
 
-// :)
+
 	import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -12,15 +12,16 @@ import edu.wpi.first.math.controller.PIDController;
 //import com.kauailabs.navx.frc.AHRS;
 
 	import edu.wpi.first.math.geometry.Pose2d;
-	import edu.wpi.first.math.geometry.Rotation2d;
-	import edu.wpi.first.math.geometry.Translation2d;
-	import edu.wpi.first.math.kinematics.ChassisSpeeds;
-	import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-	import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-	import edu.wpi.first.math.kinematics.SwerveModulePosition;
-	import edu.wpi.first.math.kinematics.SwerveModuleState;
-	import edu.wpi.first.wpilibj.SPI.Port;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.SPI.Port;
 import frc.robot.Constants.MiniPID;
+
 
 
 	/** Represents a swerve drive style drivetrain. */
@@ -38,11 +39,12 @@ import frc.robot.Constants.MiniPID;
 	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.826+0.5) * 6.28);
 	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);
 
-	double smiley = 2;
 	AHRS m_navx = new AHRS(Port.kMXP);
+	PIDController tapePID = new PIDController(0.15, 0, 0);
+
 	PIDController ATXPID = new PIDController(1, 0, 0);
 	PIDController ATYPID = new PIDController(1, 0, 0);
-	PIDController tapePID = new PIDController(0.15, 0, 0);
+	double frontRightAngle;
 
     double v_vkp = 0.1;
     double v_vki = 0.;
@@ -97,6 +99,18 @@ import frc.robot.Constants.MiniPID;
 
 	}
 
+	public double getFrontLeftSwerveModuleAngle(){
+		return frontRightAngle = m_frontLeft.getPosition().angle.getDegrees();
+	}
+	public double getFrontRightSwerveModuleAngle(){
+		return frontRightAngle = m_frontRight.getPosition().angle.getDegrees();
+	}
+	public double getBackLeftSwerveModuleAngle(){
+		return frontRightAngle = m_backLeft.getPosition().angle.getDegrees();
+	}
+	public double getBackRightSwerveModuleAngle(){
+		return frontRightAngle = m_backRight.getPosition().angle.getDegrees();
+	}
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
 		var swerveModuleStates =
@@ -209,42 +223,40 @@ import frc.robot.Constants.MiniPID;
 		}
 		return isBelow;
 	}
+
+
 	//Drive to position
-	public boolean driveToPosition(double targetPositionX, double targetPositionY, double maxSpeed, double threshold){
-		double motorOutputX = ATXPID.calculate(m_odometry.getPoseMeters().getX(), targetPositionX);
-		double motorOutputY = ATYPID.calculate(m_odometry.getPoseMeters().getY(), targetPositionY);
+    public boolean driveToPosition(double targetPositionX, double targetPositionY, double maxSpeed, double threshold){
+        double motorOutputX = ATXPID.calculate(m_odometry.getPoseMeters().getX(), targetPositionX);
+        double motorOutputY = ATYPID.calculate(m_odometry.getPoseMeters().getY(), targetPositionY);
 
-		if(motorOutputX > maxSpeed) {
-			motorOutputX = maxSpeed;
-		}
-		if(motorOutputX < -maxSpeed) {
-			motorOutputX = -maxSpeed;
-		}
-		if(motorOutputY > maxSpeed) {
-			motorOutputY = maxSpeed;
-		}
-		if(motorOutputY < -maxSpeed) {
-			motorOutputY = -maxSpeed;
-		}
+        if(motorOutputX > maxSpeed) {
+            motorOutputX = maxSpeed;
+        }
+        if(motorOutputX < -maxSpeed) {
+            motorOutputX = -maxSpeed;
+        }
+        if(motorOutputY > maxSpeed) {
+            motorOutputY = maxSpeed;
+        }
+        if(motorOutputY < -maxSpeed) {
+            motorOutputY = -maxSpeed;
+        }
 
-		boolean x_condition = Math.abs(targetPositionX - m_odometry.getPoseMeters().getX()) < threshold;
-		boolean y_condition = Math.abs(targetPositionY - m_odometry.getPoseMeters().getY()) < threshold;
+        boolean x_condition = Math.abs(targetPositionX - m_odometry.getPoseMeters().getX()) < threshold;
+        boolean y_condition = Math.abs(targetPositionY - m_odometry.getPoseMeters().getY()) < threshold;
 
-		if(x_condition && y_condition) {
-			drive(0, 0, 0, false);
-			return true;
-		}
+        if(x_condition && y_condition) {
+            drive(0, 0, 0, false);
+            return true;
+        }
 
-		drive(motorOutputX, motorOutputY, 0, false);
-		System.out.println("X is: " + m_odometry.getPoseMeters().getX());
-		// System.out.println("Y is: " + m_odometry.getPoseMeters().getY());
+        drive(motorOutputX, motorOutputY, 0, false);
+        System.out.println("X is: " + m_odometry.getPoseMeters().getX());
+        // System.out.println("Y is: " + m_odometry.getPoseMeters().getY());
 
-		return false;
-	}
-	
-	
-	
-	//Tape PID
+        return false;
+    }
 	public boolean trackTapePID(double currentPosition, double maxSpeed, double threshold){
 		double motorOutput = tapePID.calculate(currentPosition, 0);
 

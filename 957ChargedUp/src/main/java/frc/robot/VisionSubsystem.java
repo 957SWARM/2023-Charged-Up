@@ -1,7 +1,7 @@
 package frc.robot;
-import frc.robot.Drivetrain;
-import frc.robot.Limelight;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import frc.robot.Constants.ShooterSpeed;
+import frc.robot.Constants.WristPositions;
 
 public class VisionSubsystem {
 
