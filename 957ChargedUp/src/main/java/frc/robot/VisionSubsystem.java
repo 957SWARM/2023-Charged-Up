@@ -11,9 +11,11 @@ public class VisionSubsystem {
     int aprilTagCase = 0;
     int retroTapeCase = 0;
 	int cubeCase = 0;
+	int coneCase = 0;
     double aprilTagTX = 0;
 	double aprilTagTY = 0;
     double retroTapeTX = 0;
+	boolean visionControlled = false;
 
 	double ATsum = 0;
 	double ATruns = 0;
@@ -150,41 +152,69 @@ public class VisionSubsystem {
 		return false;
 	}
 
-	public boolean manipulateCubes(Drivetrain swerve, Limelight limelight, Wrist wrist, WristPositions wristPosition, Claw claw, ShooterSpeed shooterSpeed){
+	public boolean manipulateCubes(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist, Claw claw){
+		visionControlled = true;
 		switch(cubeCase){
 
+			// Get a set position for the robot, then set wrist position
 			case 0:
 				System.out.println("Case 0");
-				manipulateCubeTimer = 0;
 				if(lockOnApriltag(swerve, limelight, .75)){	
 					wrist.set(wristPosition);
 					cubeCase = 1;
 				}
+
 			break;
-				
-			case 1:
-				lockOnTimer = 0;
-				if(swerve.driveToPosition(cubePosition[0], 0, 0.2, 0.05)){
-					cubeCase = 2;
-					claw.clawOuttake(shooterSpeed);
-				}
 			
-				System.out.println(cubePosition[0] + ", " + cubePosition[1]);
+			// Drive to set position, then go up against grid
+			case 1:
+				System.out.println("Case 1");
+				lockOnTimer = 0;
+				if(swerve.driveToPosition(0, cubePosition[0], 0.2, 0.05)){
+					if(swerve.hitwall())
+						cubeCase = 0;
+						visionControlled = false;
+						return true;
+				}
+				System.out.println(cubePosition[0]);
+
 			break;
 
-			case 2:
-				System.out.println("Case 2");
-				if(manipulateCubeTimer > 0.5){
-					cubeCase = 0;
-					claw.clawStop();
-					return true;
-				}
-				manipulateCubeTimer += 0.02;
-			break;
-			
 
 		}
 		return false;
 	}
+
+	public boolean manipulateCones(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist, Claw claw){
+		visionControlled = true;
+		switch(coneCase){
+
+			// Get a set position for the robot, then set wrist position
+			case 0:
+				System.out.println("Case 0");
+				if(lockOnApriltag(swerve, limelight, .75)){	
+					wrist.set(wristPosition);
+					coneCase = 1;
+				}
+
+			break;
+			
+			// Drive to set position, then go up against grid
+			case 1:
+				System.out.println("Case 1");
+				lockOnTimer = 0;
+				if(swerve.driveToPosition(0, cubePosition[0], 0.2, 0.05)){
+					if(swerve.hitwall())
+						coneCase = 0;
+						visionControlled = false;
+						return true;
+				}
+				System.out.println(cubePosition[0]);
+
+			break;
+		}
+		return false;
+	}
+
 
 }

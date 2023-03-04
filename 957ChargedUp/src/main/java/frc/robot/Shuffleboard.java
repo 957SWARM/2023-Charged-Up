@@ -9,9 +9,9 @@ import frc.robot.Constants.WristPositions;
 
 public class Shuffleboard {
   boolean autoModeSet = false;
-  SendableChooser<String> m_chooser = new SendableChooser<>();
-  Boolean cubeModeQuestionMark = false;
-  Boolean turnModeQuestionMark = false;
+  SendableChooser<String> m_autoChooser = new SendableChooser<>();
+  static Boolean cubeMode = false;
+  static Boolean turnMode = false;
   
 
   // Run when shuffleboard is first initialized
@@ -19,35 +19,52 @@ public class Shuffleboard {
 
 
     // Add options
+    m_autoChooser.setDefaultOption("mid", "mid");
+    m_autoChooser.addOption("Cone Left", "coneLeft");
+    m_autoChooser.addOption("Cone Right", "coneRight");
+    m_autoChooser.addOption("Do Nothing", "doNothing");
+    m_autoChooser.addOption("Only Place Cube", "placeDoNothingCube");
+    m_autoChooser.addOption("Only Place Cone", "placeDoNothingCone");
+
+    SmartDashboard.putData(m_autoChooser);
 
     // Put chooser on dashboard
-    SmartDashboard.putData(m_chooser);
-    SmartDashboard.putBoolean("Claw Mode", cubeModeQuestionMark);
 
     SmartDashboard.putString("Ally 1", "0");
     SmartDashboard.putString("Ally 2", "0");
 
-    SmartDashboard.putBoolean("Turn Mode", turnModeQuestionMark);
+
   }
 
 
-  public void updateShuffleboard(int cargo, Drivetrain d, Claw c, WristPositions wp, MoveFourBars mfb, int speedVar) 
-    {
+  public static void updateShuffleboard(Drivetrain d, Claw c, String wp, String mfb, VisionSubsystem v, int speedVar) 
+    {  
+
+        //BLING BOARD (placeholder value)
+        SmartDashboard.putString("Bling Board", "bling");
+
+        //VISION TRAKCING ?!?!?!
+        SmartDashboard.putBoolean("Vision Tracking?", v.visionControlled);
+
         //ARM AND WRIST POSITIONS
-        SmartDashboard.putString("Wrist Position", wp.text());
-        SmartDashboard.putString("Arm Position", mfb.text());
+        SmartDashboard.putString("Wrist Position", wp);
+        SmartDashboard.putString("Arm Position", mfb);
 
         //CLAW OR CONE?
         if(c.clawDoubleSolenoid.get() == Value.kForward)
-            cubeModeQuestionMark = false;
+            cubeMode = false;
         if(c.clawDoubleSolenoid.get() != Value.kForward)
-            cubeModeQuestionMark = true;
+            cubeMode = true;
+		SmartDashboard.putBoolean("Claw Mode", cubeMode);
 
-		//ARE WE IN TURN MODE?
+
+      //ARE WE IN TURN MODE?
         if(speedVar == 0 || speedVar == 1){
-          turnModeQuestionMark = false;
+        	turnMode = false;
         }else if(speedVar == 2 || speedVar == 3)
-			turnModeQuestionMark = true;
+			turnMode = true;
+	    SmartDashboard.putBoolean("Turn Mode", turnMode);
+
         
         //BOT ANGLE AND WHEEL ANGLES
         SmartDashboard.putNumber("Bot Angle", d.m_navx.getAngle());
@@ -55,13 +72,14 @@ public class Shuffleboard {
         SmartDashboard.putNumber("FR", d.getFrontRightSwerveModuleAngle());
         SmartDashboard.putNumber("BL", d.getBackLeftSwerveModuleAngle());
         SmartDashboard.putNumber("BR", d.getBackRightSwerveModuleAngle());
-        
 
+        // Limit Switches
+        SmartDashboard.putBoolean("Wrist Limit Switch", c.m_limitSwitch.get());
         
     }
 
   public String updateAuto(){
-    System.out.println(m_chooser.getSelected());
-    return m_chooser.getSelected();
+    System.out.println(m_autoChooser.getSelected());
+    return m_autoChooser.getSelected();
   }
 }

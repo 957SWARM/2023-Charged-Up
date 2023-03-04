@@ -21,30 +21,32 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.ButtonPanel;
 import frc.robot.Constants.MoveFourBars;
 import frc.robot.Constants.ShooterSpeed;
 import frc.robot.Constants.WristPositions;
+import frc.robot.Subclasses.ButtonBoardLeft;
+import frc.robot.Subclasses.ButtonBoardRight;
+import frc.robot.Subclasses.DriveController;
 
 public class Robot extends TimedRobot {
+	// CLASS CONSTRUCTORS
 	private final Drivetrain m_swerve = new Drivetrain();
-
 	private final Limelight m_limelight = new Limelight();
-
 	private final Wrist m_wrist = new Wrist();
 	private final FourBar m_fourBar = new FourBar();
 	private final Claw m_claw = new Claw();
-
 	private final VisionSubsystem m_vision = new VisionSubsystem();
 
+	//FULL LIST OF ACCESSABLE AUTOS
 	String midAutoPart1 = "pathplanner/generatedJSON/midAutoPart1.wpilib.json";
 	String midAutoPart2 = "pathplanner/generatedJSON/midAutoPart2.wpilib.json";
 	Trajectory trajectory = new Trajectory();
+	String autoToBeRan = "test2";
 	double autonomousTimer = 0;
-
-	String autoToBeRan = "midAuto";
+	double teleopTimer = 0;
 
 	HolonomicDriveController controller = new HolonomicDriveController(
 			new PIDController(0.032, 0, 0), new PIDController(-0.000, 0, 0),
@@ -61,37 +63,23 @@ public class Robot extends TimedRobot {
 	private final SlewRateLimiter m_slewX = new SlewRateLimiter(3);
 	private final SlewRateLimiter m_slewY = new SlewRateLimiter(3);
 	double angleToHold = 0;
-	final int holdAngle = 0;
-	boolean holdAngleSwitch = false;
 
-	private final Joystick m_controller = new Joystick(0);
+	// CONTROLLERS
+	private final DriveController m_driveController = new DriveController(0);
+	private final ButtonBoardLeft m_bbLeft = new ButtonBoardLeft(1);
+	private final ButtonBoardRight m_bbRight = new ButtonBoardRight(2);
 
-	private static final String kJoystick = "Joystick";
-	private static final String kController = "Controller";
-	private String driveMode;
-	private final SendableChooser<String> driveChooser = new SendableChooser<>();
-
-	// CONTROLLER DRIVE
-	int xAxisDrive = 0;
-	int yAxisDrive = 0;
-	int gTurnAxis = 0;
-	int clawToggle = 0;
-	int shifter = 0;
-	int driveStyle = 0;
-	int clawIntake = 0;
-	int teleopEject = 0;
-	int teleopPlace = 0;
-	int clawIntakeStop = 0;
-
-	private final ButtonPanel m_buttonPanel = new ButtonPanel();
-
+	//VARS FOR SWITCH STATEMENTS
 	int driveVar = 0;
 	int trackingVar = 0;
 	int clawVar = 0;
 	int autoVar = 0;
+	int balVar = 0;
 
 	Trajectory currentPath;
 	Trajectory currentPath2;
+
+	SlewRateLimiter slew = new SlewRateLimiter(5);
 
 	// function for HDC
 	public boolean followTrajectory(double time, Trajectory trajectory) {
@@ -119,272 +107,314 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotInit() {
-		driveChooser.setDefaultOption("Joystick", kJoystick);
-		driveChooser.addOption("Controller", kController);
-		SmartDashboard.putData("Controller type", driveChooser);
-		driveMode = "Joystick";
-
 	}
 
 	@Override
 	public void robotPeriodic() {
-		driveMode = driveChooser.getSelected();
-		switch (driveMode) {
-			default:
-				xAxisDrive = 0; // 0 axis
-				yAxisDrive = 1; // 1 axis
-				gTurnAxis = 4; // 4 axis
-				clawToggle = 1; // button a
-				shifter = 2; // button b
-				driveStyle = 8; // right face button, holds specific angle
-				clawIntake = 2; // trigger left axis 2
-				clawIntakeStop = 3; // trigger right axis 3
-				teleopEject = 5; // left bumper
-				teleopPlace = 6; // right bumper
-				break;
-
-			/*
-			 * case kJoystick:
-			 * xAxisDrive = JoystickButtons.xAxisDrive; //0
-			 * yAxisDrive = JoystickButtons.yAxisDrive; //1
-			 * gTurnAxis = JoystickButtons.gTurnAxis; //2
-			 * clawToggle = JoystickButtons.clawToggle; //1
-			 * shifter = JoystickButtons.shifter; //12
-			 * driveStyle = JoystickButtons.driveStyle; //11
-			 * break;
-			 */
-		}
-
 		m_vision.maintainTX(m_limelight);
+		m_vision.maintainTY(m_limelight);
 
-		// SmartDashboard.putBoolean("switchEnabled", m_claw.m_limitSwitch.get());
+		Shuffleboard.updateShuffleboard(m_swerve, m_claw, m_wrist.getLabel() , m_fourBar.getLabel(), m_vision, speedVar);
+		SmartDashboard.putNumber("roll of bot", m_swerve.m_navx.getRoll());
 	}
 
 	@Override
 	public void autonomousInit() {
 		autonomousTimer = 0;
 		m_swerve.resetOdometry();
+
 		currentPath = getPath(midAutoPart1);
 		currentPath2 = getPath(midAutoPart2);
-
+		autoVar = 0;
+		autoToBeRan = "test2";
+		if(autoToBeRan == "test")
+			m_claw.cubeMode();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		switch(autoToBeRan){
-
-		case "midaAuto":
-			switch(autoVar){
-				case 0:
-					m_claw.cubeMode();
-					m_fourBar.setLevel(MoveFourBars.mid);
-					m_wrist.set(WristPositions.highCube);
-					m_claw.clawOuttake(ShooterSpeed.highCube);
-					if(autonomousTimer >= 2){
-						m_claw.clawStop();
-						m_wrist.set(WristPositions.retract);
-						m_fourBar.setLevel(MoveFourBars.ground);
-						autoVar += 1;
-					}
-				break;
-
-				case 1: 
-					autonomousTimer = 0;
-					if(followTrajectory(autonomousTimer, currentPath))
-						autoVar += 1;
-				break;
-
-				case 2:
-					if(followTrajectory(autonomousTimer, currentPath2))
-					autoVar += 1;
-				break;
-
-				case 3:
-					//balance
-				break;
-
-			}
-		break;
-
-		case "otherAuto":
-			switch(autoVar){
-				case 0:
-				break;
-			}
-		break;
-	}
-		//driveWithJoystick(false);
 		m_swerve.updateOdometry();
+		double x = m_swerve.getPose().getX();
+		double y = m_swerve.getPose().getY();
+		m_fourBar.run();
+		m_wrist.run();
 
+		switch(autoToBeRan){
+			
+			case "mid":
+				switch(autoVar){
+					case 0:
+						if(autonomousTimer <= .5){
+							m_claw.clawStop();
+						}else{
+							m_claw.clawOuttake(ShooterSpeed.midShootAuto);
+						}
+						if(autonomousTimer >= 1)
+							autoVar++;
+					break;
 
+					case 1:
+						m_claw.clawStop();
+						m_swerve.driveAngle( 1.5,0, 0, true);
+						if(x >= 4)
+							autoVar ++;
+					break;
+
+					case 2:
+						autoBalance();
+					break;
+				}
+			break;
+
+			case "coneLeft":
+				switch(autoVar){
+					case 0:
+						if(autonomousTimer == 0)
+							m_claw.coneMode();
+						if(autonomousTimer >= 0 && autonomousTimer < 3){
+							m_fourBar.setLevel(MoveFourBars.mid);
+							m_wrist.set(WristPositions.scoreUp);
+						}else if( autonomousTimer >= 3 && autonomousTimer < 4){
+							m_claw.cubeMode();
+						}else if( autonomousTimer >= 4 && autonomousTimer < 7.5){
+							m_fourBar.setLevel(MoveFourBars.ground);
+							m_wrist.set(WristPositions.retract);
+						}else if(autonomousTimer >= 7.5){
+							autoVar++;
+						}
+							
+					break;
+
+					case 1:
+						m_claw.clawStop();
+						m_swerve.driveAngle( -1,0, 0, true);
+						if(x <= -3.6){
+							autoVar ++;
+						}
+					break;
+
+					case 2:
+						m_swerve.driveAngle( 0,0, 0, true);
+					break;
+				}
+			break;
+		
+	
+			case "coneRight":
+				switch(autoVar){
+					case 0:
+						if(autonomousTimer == 0)
+							m_claw.coneMode();
+						if(autonomousTimer >= 0 && autonomousTimer < 3){
+							m_fourBar.setLevel(MoveFourBars.mid);
+							m_wrist.set(WristPositions.scoreUp);
+						}else if( autonomousTimer >= 3 && autonomousTimer < 4){
+							m_claw.cubeMode();
+						}else if( autonomousTimer >= 4 && autonomousTimer < 7.5){
+							m_fourBar.setLevel(MoveFourBars.ground);
+							m_wrist.set(WristPositions.retract);
+						}else if(autonomousTimer >= 7.5){
+							autoVar++;
+						}
+							
+					break;
+
+					case 1:
+						m_claw.clawStop();
+						m_swerve.driveAngle( -1,0, 0, true);
+						if(x <= -3.6){
+							autoVar ++;
+						}
+					break;
+
+					case 2:
+						m_swerve.driveAngle( 0,0, 0, true);
+					break;
+					}
+			break;
+
+			case "doNothing":
+				switch(autoVar){
+					case 0:
+					break;
+				}
+			break;
+			
+
+			case "placeDoNothingCube":
+				switch(autoVar){
+					case 0:
+						if(autonomousTimer <= .5){
+							m_claw.clawStop();
+						}else{
+							m_claw.clawOuttake(ShooterSpeed.midShootAuto);
+						}
+					break;
+				}
+			break;
+
+			case "placeDoNothingCone":
+				switch(autoVar){
+					case 0:
+						if(autonomousTimer == 0)
+							m_claw.coneMode();
+						if(autonomousTimer >= 0 && autonomousTimer < 3){
+							m_fourBar.setLevel(MoveFourBars.mid);
+							m_wrist.set(WristPositions.scoreUp);
+						}else if( autonomousTimer >= 3 && autonomousTimer < 4){
+							m_claw.cubeMode();
+						}else if( autonomousTimer >= 4 && autonomousTimer < 7.5){
+							m_fourBar.setLevel(MoveFourBars.ground);
+							m_wrist.set(WristPositions.retract);
+						}
+					break;
+				}
+			break;
+		}
 		autonomousTimer += 0.02;
+	}
+
+	public void autoBalance(){
+		double modPitch = m_swerve.m_navx.getRoll();
+		switch(balVar){
+			case 0: // hits
+				m_swerve.drive(-1, 0, -0, true);
+				if(modPitch < -10)
+					balVar++;
+			break;
+
+			case 1: //half on
+				m_swerve.drive(-.6, 0, 0, true);
+				if(modPitch > -8)
+					balVar++;
+			break;
+
+			case 2: // slght balanced
+				if(modPitch > 2){
+					m_swerve.drive(.2, 0, 0, true);
+				}else if(modPitch < -2){
+					m_swerve.drive(-.2, 0, 0, true);
+				}else{
+					m_swerve.drive(0, 0, 0, true);
+				}
+			break;
+
+		}
 	}
 
 	@Override
 	public void teleopInit() {
+		teleopTimer = 0;
 	}
 
 	@Override
 	public void teleopPeriodic() {
 
 		m_swerve.updateOdometry();
-		speedShift(m_controller.getRawButtonReleased(shifter));
-		driveMode(m_controller.getRawAxis(xAxisDrive), m_controller.getRawAxis(yAxisDrive),
-				-m_controller.getRawAxis(gTurnAxis));
+		speedShift(m_driveController.shifter());
+		driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
+				-m_driveController.getRightStickX());
 
-		if (m_controller.getRawAxis(clawIntake) > .5) { // left trigger
+		if (m_driveController.clawIntake() > .5) { 
 			m_claw.clawIntake(.5);
-		} else if (m_controller.getRawButton(teleopEject)) { // left bumper
+		} else if (m_driveController.highCube()) { 
 			m_claw.clawOuttake(ShooterSpeed.highCube);
-		} else if (m_controller.getRawButton(teleopPlace)) { // right bumper
+		} else if (m_driveController.midCube()) { 
+			m_claw.clawOuttake(ShooterSpeed.midCube);
+		} else if (m_driveController.place()){
 			m_claw.clawOuttake(ShooterSpeed.placeCube);
-		} else if (m_controller.getRawAxis(clawIntakeStop) > .5 || m_claw.m_limitSwitch.get() == false) { // right
-																											// trigger
+		}else if (m_driveController.clawIntakeStop() > .5 || m_claw.m_limitSwitch.get() == false) { // right trigger
 			m_claw.clawStop();
 		}
 
 		switch (clawVar) {
 			case 0:
 				m_claw.coneMode();
-				if (m_controller.getRawButton(clawToggle))
+				if (m_driveController.clawToggle())
 					clawVar = 1;
 				break;
 
 			case 1:
 				m_claw.coneMode();
-				if (!m_controller.getRawButton(clawToggle))
+				if (!m_driveController.clawToggle())
 					clawVar = 2;
 				break;
 
 			case 2:
 				m_claw.cubeMode();
-				if (m_controller.getRawButton(clawToggle))
+				if (m_driveController.clawToggle())
 					clawVar = 3;
 				break;
 
 			case 3:
 				m_claw.cubeMode();
-				if (!m_controller.getRawButton(clawToggle))
+				if (!m_driveController.clawToggle())
 					clawVar = 0;
 				break;
-		}
-		/*
-		 * switch(trackingVar){
-		 * case 0:
-		 * m_vision.resetCases();
-		 * driveMode(m_controller.getRawAxis(xAxisDrive),
-		 * m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
-		 * if(m_buttonPanel.visionConePressed())//cone
-		 * trackingVar = 1;
-		 * if(m_buttonPanel.visionCubePressed())//cube
-		 * trackingVar = 3;
-		 * break;
-		 * 
-		 * case 1://cone
-		 * driveMode(m_controller.getRawAxis(xAxisDrive),
-		 * m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
-		 * if(!m_buttonPanel.visionConePressed())//cone
-		 * trackingVar = 2;
-		 * break;
-		 * 
-		 * case 2://cone
-		 * m_vision.TapeTracking(m_swerve, m_limelight);
-		 * if(m_buttonPanel.visionConePressed() || m_buttonPanel.visionCubePressed())
-		 * trackingVar = 5;
-		 * break;
-		 * 
-		 * case 3://cube
-		 * driveMode(m_controller.getRawAxis(xAxisDrive),
-		 * m_controller.getRawAxis(yAxisDrive), m_controller.getRawAxis(gTurnAxis));
-		 * if(!m_buttonPanel.visionCubePressed())
-		 * trackingVar = 4;
-		 * break;
-		 * 
-		 * case 4://cube
-		 * m_vision.AprilTagTracking(m_swerve, m_limelight);
-		 * if(m_buttonPanel.visionConePressed() || m_buttonPanel.visionCubePressed())
-		 * trackingVar = 5;
-		 * break;
-		 * 
-		 * case 5:
-		 * if(!m_buttonPanel.visionConePressed() && !m_buttonPanel.visionCubePressed())
-		 * trackingVar = 0;
-		 * break;
-		 * 
-		 * }
-		 * 
-		 * speedShift(m_controller.getRawButtonReleased(shifter));
-		 * 
-		 * 
-		 * 
-		 * 
-		 */
-		if (m_buttonPanel.wristRetractPressed())
+			}
+		
+
+		if (m_bbRight.wristRetract())
 			m_wrist.set(WristPositions.retract);
-		if (m_buttonPanel.wristScoreUpPressed())
+		if (m_bbRight.wrist45())
 			m_wrist.set(WristPositions.scoreUp);
-		if (m_buttonPanel.wristScoreOutPressed())
+		if (m_bbRight.wristOut())
 			m_wrist.set(WristPositions.scoreOut);
-		if (m_buttonPanel.wristGroundPressed())
-			m_wrist.set(WristPositions.ground);
+		if(m_bbRight.wristSub())
+			m_wrist.set(WristPositions.substation);	
+
+		if(m_bbLeft.pickupCone())
+			m_wrist.set(WristPositions.coneGround);
+		if(m_bbRight.pickupCube())
+			m_wrist.set(WristPositions.cubeGround);
+
 		m_wrist.run();
 
-		if (m_buttonPanel.armHighPressed())
+		if (m_bbLeft.armMax())
 			m_fourBar.setLevel(MoveFourBars.high);
-		if (m_buttonPanel.armMidPressed())
+		if (m_bbLeft.armMid())
 			m_fourBar.setLevel(MoveFourBars.mid);
-		if (m_buttonPanel.armSubPressed())
+		if (m_bbLeft.armSub())
 			m_fourBar.setLevel(MoveFourBars.substation);
-		if (m_buttonPanel.armGroundPressed())
+		if (m_bbLeft.armRectract())
 			m_fourBar.setLevel(MoveFourBars.ground);
+
 		m_fourBar.run();
 
-		if(m_buttonPanel.visionCubePressed())
-			m_wrist.set(WristPositions.substation);
+		if(teleopTimer >= 105 && teleopTimer <= 107){	
+			m_driveController.setRumble(RumbleType.kBothRumble, 1);
+		}else{
+			m_driveController.setRumble(RumbleType.kBothRumble, 0);
+		}
 
 	}
 
 	public void speedShift(boolean getRawButtonReleased) {
-		/*
-		 * switch(speedVar){
-		 * case 0:
-		 * if(m_controller.getRawButtonReleased(changeSpeedButton)){
-		 * speedMult = 1;
-		 * speedVar++;
-		 * }
-		 * break;
-		 * case 1:
-		 * if(m_controller.getRawButtonReleased(changeSpeedButton)){
-		 * speedMult = 0.25;
-		 * speedVar = 0;
-		 * }
-		 * break;
-		 * }
-		 */
+		
 
 		switch (speedVar) {
 			case 0:
 				speedMult = 1;
-				if (m_controller.getRawButton(shifter)) {
+				if (m_driveController.shifter()) {
 					speedVar++;
 				}
 				break;
 
 			case 1:
-				if (!m_controller.getRawButton(shifter)) {
+				if (!m_driveController.shifter()) {
 					speedVar++;
 				}
 				break;
 
 			case 2:
 				speedMult = 0.25;
-				if (m_controller.getRawButton(shifter)) {
+				if (m_driveController.shifter()) {
 					speedVar++;
 				}
 				break;
 
 			case 3:
-				if (!m_controller.getRawButton(shifter)) {
+				if (!m_driveController.shifter()) {
 					speedVar = 0;
 				}
 				break;
@@ -394,13 +424,15 @@ public class Robot extends TimedRobot {
 	public void driveAngle(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
 
 		double[] arr = deadZone(xSpeed, ySpeed, 0.2);
-		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(arr[0], 0.2));
-		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(arr[1], 0.2));
+		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));
+		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
 
-		m_swerve.driveAngle(-ySpeed * speedMult * 3, -xSpeed * speedMult * 3, -rot, fieldRelative);
+		m_swerve.driveAngle(-ySpeed * speedMult * 3, -xSpeed * speedMult * 3, rot, fieldRelative);
 	}
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+
+
 		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));
 		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
 		rot = m_rotLimiter.calculate(MathUtil.applyDeadband(rot, 0.2));
@@ -413,21 +445,27 @@ public class Robot extends TimedRobot {
 		double c;
 		double d;
 		double e;
+		double f=0;
 
 		if (0.7 < Math.abs(x) || 0.7 < Math.abs(y)) {
-			angleToHold = Math.toDegrees(Math.atan2(y, x));
+			f = Math.toDegrees(Math.atan2(x, -y));
+		}else{
+			return angleToHold;
 		}
-		if (angleToHold < 0) {
-			a = angleToHold;
-			b = angleToHold + 360;
+		
+		if (f < 0) {
+			a = f;
+			b = f + 360;
 		} else {
-			b = angleToHold;
-			a = angleToHold - 360;
+			b = f;
+			a = f - 360;
 		}
 		c = (m_swerve.m_navx.getAngle() - (m_swerve.m_navx.getAngle() % 360)) / 360;
+		c = c + 0;
 		d = (360 * c) + a;
 		e = (360 * c) + b;
 
+		System.out.println(m_swerve.m_navx.getAngle());
 		if (Math.abs(m_swerve.m_navx.getAngle() - d) <= 180) {
 			angleToHold = a;
 		} else {
@@ -435,13 +473,12 @@ public class Robot extends TimedRobot {
 		}
 
 		return angleToHold;
-
 	}
 
 	public static double[] deadZone(double xAxis, double yAxis, double deadZoneRange) {
 		double deadZoneArray[];
 		deadZoneArray = new double[2];
-		if (xAxis < deadZoneRange && yAxis < deadZoneRange) {
+		if (Math.abs(xAxis) < deadZoneRange && Math.abs(yAxis) < deadZoneRange) {
 			xAxis = 0;
 			yAxis = 0;
 		}
@@ -454,28 +491,40 @@ public class Robot extends TimedRobot {
 		switch (driveVar) {
 			case 0:
 				drive(x, y, rot, true);
-				if (m_controller.getRawButton(driveStyle))
+				if (m_driveController.driveStyle())
 					driveVar++;
 				break;
 
 			case 1:
 				drive(x, y, rot, true);
-				if (!m_controller.getRawButton(driveStyle))
+				if (!m_driveController.driveStyle())
 					driveVar++;
 				break;
 
 			case 2:
-				driveAngle(x, y, rot, true);
-				if (m_controller.getRawButton(driveStyle))
+				driveAngle(x, y, joyAngle(Math.round(m_driveController.getRightStickX()), Math.round(m_driveController.getRightStickY())), true);
+				if (m_driveController.driveStyle())
 					driveVar++;
 				break;
 
 			case 3:
-				driveAngle(x, y, rot, true);
-				if (!m_controller.getRawButton(driveStyle))
+				driveAngle(x, y, joyAngle(Math.round(m_driveController.getRightStickX()), m_driveController.getRightStickY()), true);
+				if (!m_driveController.driveStyle())
 					driveVar = 0;
 				break;
 		}
+	}
 
+	@Override
+	public void testInit(){
+
+	}
+
+	@Override 
+	public void testPeriodic(){
+		//test for rumble
+		if(DriverStation.getMatchTime() <= 30 && DriverStation.getMatchTime() >= 25){
+			m_driveController.setRumble(RumbleType.kBothRumble, 1);
+		}
 	}
 }

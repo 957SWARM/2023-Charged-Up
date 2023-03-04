@@ -41,7 +41,7 @@ public class Claw {
         if(m_limitSwitch.get()){
             clawMain.set(TalonSRXControlMode.PercentOutput, -speed);
         }else{
-            clawStop();
+            clawMain.set(TalonSRXControlMode.PercentOutput, -.2);
         }
     } 
 
@@ -50,7 +50,7 @@ public class Claw {
     }
     
     public void clawStop(){
-        clawMain.set(TalonSRXControlMode.PercentOutput, 0);
+        clawMain.set(TalonSRXControlMode.PercentOutput, -.05);
     }
     
 }

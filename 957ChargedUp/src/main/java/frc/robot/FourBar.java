@@ -24,6 +24,7 @@ public class FourBar {
     //double targetArmPosition = 0;
     double targetBarPosition = 0;
     IdleMode currentIdleMode = IdleMode.kCoast;
+    MoveFourBars barPosition = MoveFourBars.ground;
 
     public FourBar(){        
         fourBarMotor.restoreFactoryDefaults();
@@ -39,35 +40,16 @@ public class FourBar {
 
         fourBarMotor.setSmartCurrentLimit(30);
 
-        //armMotor.restoreFactoryDefaults();
-        //armMotor.setIdleMode(IdleMode.kBrake);
-
-        /*
-        armPid.setP(ArmPidConstants.kArmP);
-        armPid.setI(ArmPidConstants.kArmI);
-        armPid.setD(ArmPidConstants.kArmD);
-        armPid.setFF(ArmPidConstants.kArmFF);
-        armPid.setOutputRange(ArmPidConstants.kArmMinOutput, ArmPidConstants.kArmMaxOutput);
-        armPid.setSmartMotionMaxVelocity(ArmPidConstants.armMaxVel, 0);
-        armPid.setSmartMotionMaxVelocity(ArmPidConstants.armMaxAcc, 0);
-        */
-
+       
     }
     
     public void setLevel(MoveFourBars level) {
-	    //targetArmPosition = level.armPosition();
         targetBarPosition = level.barPosition();
+        barPosition = level;
 	}
 
     public void run(){
-        /*
-        if(targetArmPosition < 0.1){
-            targetArmPosition = 0.1;
-        }
-        if(targetArmPosition > 100){
-            targetArmPosition = 100;
-        }
-        */
+      
         if(targetBarPosition < 0){
             targetBarPosition = 0;
         }
@@ -76,16 +58,17 @@ public class FourBar {
         }
         if(targetBarPosition == 0 && fourBarEncoder.getPosition() < 3){
             fourBarMotor.set(0);
-           // if(fourBarMotor.getIdleMode() != IdleMode.kBrake){
-             //   fourBarMotor.setIdleMode(IdleMode.kBrake);
-           // }
             return;
         }
         if(fourBarMotor.getIdleMode() != IdleMode.kCoast){
             fourBarMotor.setIdleMode(IdleMode.kCoast);
         }
-       // armPid.setReference(targetArmPosition, ControlType.kSmartMotion);
         fourBarPid.setReference(targetBarPosition, ControlType.kSmartMotion);
     }
+
+    public String getLabel(){
+        return barPosition.text();
+    }
+    
 }
        

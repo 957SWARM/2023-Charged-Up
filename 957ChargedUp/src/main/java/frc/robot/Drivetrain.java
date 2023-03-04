@@ -11,7 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 //import com.kauailabs.navx.frc.AHRS;
 
-	import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -50,6 +50,8 @@ import frc.robot.Constants.MiniPID;
     double v_vki = 0.;
     double v_vkd = 0;
     MiniPID visionPID = new MiniPID(v_vkp,v_vki,v_vki);
+
+	Rotation2d angleOffset = new Rotation2d();
 
 	private final SwerveDriveKinematics m_kinematics =
 		new SwerveDriveKinematics(
@@ -129,8 +131,10 @@ import frc.robot.Constants.MiniPID;
 
 	/** Updates the field relative position of the robot. */
 	public void updateOdometry() {
+		Rotation2d calculatedAngle = m_navx.getRotation2d().minus(angleOffset);
+		
 		m_odometry.update(
-			m_navx.getRotation2d(),
+			calculatedAngle,
 			new SwerveModulePosition[] {
 			m_frontLeft.getPosition(),
 			m_frontRight.getPosition(),
@@ -140,14 +144,20 @@ import frc.robot.Constants.MiniPID;
 	}
 
 	public void resetOdometry() {
+		Rotation2d calculatedAngle = m_navx.getRotation2d().minus(angleOffset);
+
 		m_odometry.resetPosition(
-			m_navx.getRotation2d(), 			
+			calculatedAngle, 			
 			new SwerveModulePosition[] {
 				m_frontLeft.getPosition(),
 				m_frontRight.getPosition(),
 				m_backLeft.getPosition(),
 				m_backRight.getPosition()},
-			new Pose2d());
+			new Pose2d());	
+	}
+
+	public void centerGyro(){
+		angleOffset = m_navx.getRotation2d();
 	}
 
 	public Pose2d getPose(){

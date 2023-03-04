@@ -2,9 +2,9 @@ package frc.robot.Constants;
 public enum ShooterSpeed {
 
     placeCube(0.2  , "place cube"),
-    placeCone(0.6, "place cone"),
-    teleopEject(0.7 , "Teleop Eject"),
+    teleopEject(.5 , "Teleop Eject"), //.7
     midCube(.5, "Mid Cube"),
+    midShootAuto(.5, "midShootAuto"),
     highCube(.7, "High Cube");
 
     private final double speed;
