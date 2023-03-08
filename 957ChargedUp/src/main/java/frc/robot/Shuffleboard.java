@@ -44,7 +44,7 @@ public class Shuffleboard {
         SmartDashboard.putString("Bling Board", "bling");
 
         //VISION TRAKCING ?!?!?!
-        SmartDashboard.putBoolean("Vision Tracking?", v.visionControlled);
+        // SmartDashboard.putBoolean("Vision Tracking?", .visionControlled);
 
         //ARM AND WRIST POSITIONS
         SmartDashboard.putString("Wrist Position", wp);
@@ -76,6 +76,9 @@ public class Shuffleboard {
         // Limit Switches
         SmartDashboard.putBoolean("Wrist Limit Switch", c.m_limitSwitch.get());
         
+        // VISION
+        SmartDashboard.putNumber("X position", d.xPosition);
+        SmartDashboard.putNumber("Target", v.cubePosition[0]);
     }
 
   public String updateAuto(){

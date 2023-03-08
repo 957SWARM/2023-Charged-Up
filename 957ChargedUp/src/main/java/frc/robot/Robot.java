@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
 	private final FourBar m_fourBar = new FourBar();
 	private final Claw m_claw = new Claw();
 	private final VisionSubsystem m_vision = new VisionSubsystem();
+	// private final Bling m_bling = new Bling();
 
 	//FULL LIST OF ACCESSABLE AUTOS
 	String midAutoPart1 = "pathplanner/generatedJSON/midAutoPart1.wpilib.json";
@@ -75,6 +76,10 @@ public class Robot extends TimedRobot {
 	int clawVar = 0;
 	int autoVar = 0;
 	int balVar = 0;
+	int driveCase = 0;
+
+	// SHUFFLEBOARD VAR
+	boolean visionControlled = false;
 
 	Trajectory currentPath;
 	Trajectory currentPath2;
@@ -107,6 +112,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotInit() {
+		// m_bling.timerStart();
 	}
 
 	@Override
@@ -144,6 +150,7 @@ public class Robot extends TimedRobot {
 			case "mid":
 				switch(autoVar){
 					case 0:
+						m_wrist.set(WristPositions.backShootCube);
 						if(autonomousTimer <= .5){
 							m_claw.clawStop();
 						}else{
@@ -311,9 +318,85 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 
 		m_swerve.updateOdometry();
+		if (m_driveController.slowMidSpeed()) // sets to fast speed: 4.2 m/s
+			speedMult = 1;
 		speedShift(m_driveController.shifter());
-		driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
-				-m_driveController.getRightStickX());
+
+		switch(driveCase){
+
+			// Normal Driving
+			case 0:
+				visionControlled = false;
+				driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
+						-m_driveController.getRightStickX());
+				m_vision.resetCases();
+				if(m_bbRight.vision1()){
+					driveCase = 1;
+				}
+				else if(m_bbRight.vision2()){
+					driveCase = 2;
+				}
+			break;
+
+			// Normal Driving but waiting for Cube button Unpress
+			case 1:
+				visionControlled = false;
+				driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
+					-m_driveController.getRightStickX());
+				if(!m_bbRight.vision1()){
+					driveCase = 3;
+				}
+
+			break;
+
+			// Normal Driving but waiting for Cone button Unpress
+			case 2:
+				visionControlled = false;
+				driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
+					-m_driveController.getRightStickX());
+				if(!m_bbRight.vision2()){
+					driveCase = 4;
+				}
+
+			// Cube
+			case 3:
+				System.out.println("Cube");
+				visionControlled = true;
+				if(m_bbRight.vision1()){
+					driveCase = 5;
+				}
+				if(m_vision.manipulateCubes(m_wrist.wristPos, m_swerve, m_limelight, m_wrist))
+					driveCase = 5;
+			break;
+
+			// Cone
+			case 4:
+				System.out.println("Cone");
+				visionControlled = true;
+				if(m_bbRight.vision2()){
+					driveCase = 6;
+				}
+				if(m_vision.TapeTracking(m_wrist.wristPos, m_swerve, m_limelight, m_wrist))
+					driveCase = 6;
+			break;
+
+			// Cancel Case (Cubes)
+			case 5:
+				visionControlled = false;
+				if(!m_bbRight.vision1()){
+					driveCase = 0;
+				}
+
+			break;
+
+			// Cancel Case (Cones)
+			case 6:
+				m_limelight.setPipe(0);
+				visionControlled = false;
+				if(!m_bbRight.vision2()){
+					driveCase = 0;
+				}
+		}
 
 		if (m_driveController.clawIntake() > .5) { 
 			m_claw.clawIntake(.5);
@@ -325,7 +408,10 @@ public class Robot extends TimedRobot {
 			m_claw.clawOuttake(ShooterSpeed.placeCube);
 		}else if (m_driveController.clawIntakeStop() > .5 || m_claw.m_limitSwitch.get() == false) { // right trigger
 			m_claw.clawStop();
+		}else if(m_driveController.centerGyro()){
+			m_swerve.centerGyro(0);
 		}
+
 
 		switch (clawVar) {
 			case 0:
@@ -362,6 +448,9 @@ public class Robot extends TimedRobot {
 			m_wrist.set(WristPositions.scoreOut);
 		if(m_bbRight.wristSub())
 			m_wrist.set(WristPositions.substation);	
+		if (m_bbRight.vision3())
+			m_wrist.set(WristPositions.backShootCube);
+
 
 		if(m_bbLeft.pickupCone())
 			m_wrist.set(WristPositions.coneGround);
@@ -378,6 +467,14 @@ public class Robot extends TimedRobot {
 			m_fourBar.setLevel(MoveFourBars.substation);
 		if (m_bbLeft.armRectract())
 			m_fourBar.setLevel(MoveFourBars.ground);
+		/*
+		if(m_bbLeft.blingCone()){
+			m_bling.blingSend(1);
+		}
+		if(m_bbLeft.blingCube()){
+			m_bling.blingSend(2);
+		}
+		*/
 
 		m_fourBar.run();
 
@@ -394,26 +491,28 @@ public class Robot extends TimedRobot {
 
 		switch (speedVar) {
 			case 0:
-				speedMult = 1;
+				speedMult = 0.6;
 				if (m_driveController.shifter()) {
 					speedVar++;
 				}
 				break;
 
 			case 1:
+				speedMult = 0.6;
 				if (!m_driveController.shifter()) {
 					speedVar++;
 				}
 				break;
 
 			case 2:
-				speedMult = 0.25;
+				speedMult = 0.36;
 				if (m_driveController.shifter()) {
 					speedVar++;
 				}
 				break;
 
 			case 3:
+				speedMult = 0.36;
 				if (!m_driveController.shifter()) {
 					speedVar = 0;
 				}
@@ -427,7 +526,7 @@ public class Robot extends TimedRobot {
 		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));
 		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
 
-		m_swerve.driveAngle(-ySpeed * speedMult * 3, -xSpeed * speedMult * 3, rot, fieldRelative);
+		m_swerve.driveAngle(-ySpeed * speedMult * 4.2, -xSpeed * speedMult * 4.2, rot, fieldRelative);
 	}
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
@@ -436,40 +535,14 @@ public class Robot extends TimedRobot {
 		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));
 		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
 		rot = m_rotLimiter.calculate(MathUtil.applyDeadband(rot, 0.2));
-		m_swerve.drive(-ySpeed * speedMult * 3, -xSpeed * speedMult * 3, rot * 6.28 * speedMult, fieldRelative);
+		m_swerve.drive(-ySpeed * speedMult * 4.2, -xSpeed * speedMult * 4.2, rot * 6.28 * speedMult, fieldRelative);
 	}
 
 	public double joyAngle(double x, double y) {
-		double a;
-		double b;
-		double c;
-		double d;
-		double e;
-		double f=0;
-
 		if (0.7 < Math.abs(x) || 0.7 < Math.abs(y)) {
-			f = Math.toDegrees(Math.atan2(x, -y));
+			angleToHold = Math.toDegrees(Math.atan2(x, -y));
 		}else{
 			return angleToHold;
-		}
-		
-		if (f < 0) {
-			a = f;
-			b = f + 360;
-		} else {
-			b = f;
-			a = f - 360;
-		}
-		c = (m_swerve.m_navx.getAngle() - (m_swerve.m_navx.getAngle() % 360)) / 360;
-		c = c + 0;
-		d = (360 * c) + a;
-		e = (360 * c) + b;
-
-		System.out.println(m_swerve.m_navx.getAngle());
-		if (Math.abs(m_swerve.m_navx.getAngle() - d) <= 180) {
-			angleToHold = a;
-		} else {
-			angleToHold = b;
 		}
 
 		return angleToHold;

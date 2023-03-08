@@ -15,7 +15,6 @@ public class VisionSubsystem {
     double aprilTagTX = 0;
 	double aprilTagTY = 0;
     double retroTapeTX = 0;
-	boolean visionControlled = false;
 
 	double ATsum = 0;
 	double ATruns = 0;
@@ -75,9 +74,7 @@ public class VisionSubsystem {
 			
 			//Case 1 - Drive
 			case 1:
-				if( swerve.realestDriveMeters(ATavgTX + offset, .7, .05)){
-					aprilTagCase = 2;
-                }
+
 			break;
 			
 			//Case 2 - Hit wall
@@ -92,28 +89,23 @@ public class VisionSubsystem {
         return false;
     }
 
-    public boolean TapeTracking(Drivetrain swerve, Limelight limelight){
-        
+    public boolean TapeTracking(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist){
+        limelight.setPipe(2);
         switch(retroTapeCase){
 			//Case 0 - PID Track
 			case 0:
 				if(swerve.trackTapePID(limelight.getTx(), 1.5, .1)){
-					retroTapeCase = 1;
-					swerve.resetOdometry();
+					// wrist.set(wristPosition);
+					//retroTapeCase = 1;
+					// swerve.resetOdometry();
 				}
 			break;
 			
-			//Case 1 - Drive x meters (adjusting for limelight position on robot)
+			//Case 1 - Drive to wall
 			case 1:
-				if (swerve.loserDriveMeters(offset, .5, .05)){
-					retroTapeCase = 2;
-				}
-			break;
-			
-			//Case 2 - Drive to wall
-			case 2:
 				if ( swerve.hitwall()){
 					retroTapeCase = 0;
+					limelight.setPipe(0);
                     return true;
 				}
 			break;
@@ -152,15 +144,14 @@ public class VisionSubsystem {
 		return false;
 	}
 
-	public boolean manipulateCubes(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist, Claw claw){
-		visionControlled = true;
+	public boolean manipulateCubes(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist){
+		limelight.setPipe(0);
 		switch(cubeCase){
 
 			// Get a set position for the robot, then set wrist position
 			case 0:
 				System.out.println("Case 0");
 				if(lockOnApriltag(swerve, limelight, .75)){	
-					wrist.set(wristPosition);
 					cubeCase = 1;
 				}
 
@@ -170,13 +161,10 @@ public class VisionSubsystem {
 			case 1:
 				System.out.println("Case 1");
 				lockOnTimer = 0;
-				if(swerve.driveToPosition(0, cubePosition[0], 0.2, 0.05)){
-					if(swerve.hitwall())
-						cubeCase = 0;
-						visionControlled = false;
-						return true;
+				if(swerve.driveToPosition(0, cubePosition[0], 1, 0.05)){
+					cubeCase = 0;
+					return true;
 				}
-				System.out.println(cubePosition[0]);
 
 			break;
 
@@ -184,37 +172,5 @@ public class VisionSubsystem {
 		}
 		return false;
 	}
-
-	public boolean manipulateCones(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist, Claw claw){
-		visionControlled = true;
-		switch(coneCase){
-
-			// Get a set position for the robot, then set wrist position
-			case 0:
-				System.out.println("Case 0");
-				if(lockOnApriltag(swerve, limelight, .75)){	
-					wrist.set(wristPosition);
-					coneCase = 1;
-				}
-
-			break;
-			
-			// Drive to set position, then go up against grid
-			case 1:
-				System.out.println("Case 1");
-				lockOnTimer = 0;
-				if(swerve.driveToPosition(0, cubePosition[0], 0.2, 0.05)){
-					if(swerve.hitwall())
-						coneCase = 0;
-						visionControlled = false;
-						return true;
-				}
-				System.out.println(cubePosition[0]);
-
-			break;
-		}
-		return false;
-	}
-
 
 }

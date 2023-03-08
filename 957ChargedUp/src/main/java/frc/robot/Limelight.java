@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Limelight {
@@ -24,7 +25,7 @@ DoubleSubscriber jsonSub = table.getDoubleTopic("tjson").subscribe(0);
 DoubleSubscriber getpipeSub = table.getDoubleTopic("getpipe").subscribe(0);
 double [] campose = table.getEntry("campose").getDoubleArray(new double[]{});
 double [] botpose = table.getEntry("botpose").getDoubleArray(new double[]{});
-
+NetworkTableEntry pipelineEntry = table.getEntry("pipeline");
 
 // Whether or not a target is seen
   public double getTv(){
@@ -99,6 +100,10 @@ double [] botpose = table.getEntry("botpose").getDoubleArray(new double[]{});
     return id;
   }
 
+  public void setPipe(int id){
+    pipelineEntry.setNumber(id);
+  }
+
   public double getDistance(){
 
   campose = table.getEntry("campose").getDoubleArray(new double[]{0,0,0,0,0,0});
@@ -119,5 +124,6 @@ double [] botpose = table.getEntry("botpose").getDoubleArray(new double[]{});
     double ty = campose[2];
     return ty;
   }
+
 
 }

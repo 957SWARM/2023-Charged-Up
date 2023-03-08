@@ -21,6 +21,9 @@ public class DriveController extends Joystick {
 	static int place = 4; // y button
     static int highCube = 6; //right bumper 
 	static int clawIntakeStop = 3; // left trigger axis 3
+    static int slowMidSpeed = 2; // b button
+    static int centerGyro = 7; // Left top button (by xbox button)
+
 
     public boolean clawToggle(){
         return super.getRawButton(clawToggle);
@@ -70,4 +73,12 @@ public class DriveController extends Joystick {
         return super.getRawAxis(clawIntakeStop);
     }
     
+    public boolean slowMidSpeed(){
+        return super.getRawButton(slowMidSpeed);
+    }
+
+    public boolean centerGyro(){
+        System.out.println("center");
+        return super.getRawButton(centerGyro);
+    }
 }
