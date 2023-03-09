@@ -39,13 +39,14 @@ public class Robot extends TimedRobot {
 	private final FourBar m_fourBar = new FourBar();
 	private final Claw m_claw = new Claw();
 	private final VisionSubsystem m_vision = new VisionSubsystem();
-	// private final Bling m_bling = new Bling();
+	private final Shuffleboard m_shuffle = new Shuffleboard();
+	private final Bling m_bling = new Bling();
 
 	//FULL LIST OF ACCESSABLE AUTOS
 	String midAutoPart1 = "pathplanner/generatedJSON/midAutoPart1.wpilib.json";
 	String midAutoPart2 = "pathplanner/generatedJSON/midAutoPart2.wpilib.json";
 	Trajectory trajectory = new Trajectory();
-	String autoToBeRan = "test2";
+	String autoToBeRan;
 	double autonomousTimer = 0;
 	double teleopTimer = 0;
 
@@ -112,15 +113,15 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotInit() {
-		// m_bling.timerStart();
+		m_bling.timerStart();
 	}
 
 	@Override
 	public void robotPeriodic() {
 		m_vision.maintainTX(m_limelight);
 		m_vision.maintainTY(m_limelight);
-
-		Shuffleboard.updateShuffleboard(m_swerve, m_claw, m_wrist.getLabel() , m_fourBar.getLabel(), m_vision, speedVar);
+		autoToBeRan = m_shuffle.updateAuto();
+		m_shuffle.updateShuffleboard(m_swerve, m_claw, m_wrist.getLabel() , m_fourBar.getLabel(), m_vision, speedVar);
 		SmartDashboard.putNumber("roll of bot", m_swerve.m_navx.getRoll());
 	}
 
@@ -132,9 +133,13 @@ public class Robot extends TimedRobot {
 		currentPath = getPath(midAutoPart1);
 		currentPath2 = getPath(midAutoPart2);
 		autoVar = 0;
-		autoToBeRan = "test2";
-		if(autoToBeRan == "test")
+		if(autoToBeRan != "placeDoNothingCones" && autoToBeRan != "coneLeft" && autoToBeRan != "coneRight" && autoToBeRan != "mid"){
+			m_swerve.centerGyro(0);
 			m_claw.cubeMode();
+		}else{
+			m_swerve.centerGyro(.5);
+			m_claw.coneMode();
+		}
 	}
 
 	@Override
@@ -150,25 +155,26 @@ public class Robot extends TimedRobot {
 			case "mid":
 				switch(autoVar){
 					case 0:
-						m_wrist.set(WristPositions.backShootCube);
-						if(autonomousTimer <= .5){
-							m_claw.clawStop();
-						}else{
-							m_claw.clawOuttake(ShooterSpeed.midShootAuto);
-						}
-						if(autonomousTimer >= 1)
-							autoVar++;
+					m_fourBar.setLevel(MoveFourBars.mid);
+					m_wrist.set(WristPositions.scoreUp);
+					if(autonomousTimer >= 2)
+						autoVar++;
 					break;
 
 					case 1:
-						m_claw.clawStop();
-						m_swerve.driveAngle( 1.5,0, 0, true);
-						if(x >= 4)
-							autoVar ++;
+						m_claw.clawOuttake(ShooterSpeed.midCube);
+						if(autonomousTimer >= 3.5)
+							autoVar++;
 					break;
 
 					case 2:
+						m_claw.clawStop();
+						m_fourBar.setLevel(MoveFourBars.ground);
+						m_wrist.set(WristPositions.retract);
 						autoBalance();
+					break;
+
+					case 3:
 					break;
 				}
 			break;
@@ -176,6 +182,7 @@ public class Robot extends TimedRobot {
 			case "coneLeft":
 				switch(autoVar){
 					case 0:
+					
 						if(autonomousTimer == 0)
 							m_claw.coneMode();
 						if(autonomousTimer >= 0 && autonomousTimer < 3){
@@ -194,14 +201,14 @@ public class Robot extends TimedRobot {
 
 					case 1:
 						m_claw.clawStop();
-						m_swerve.driveAngle( -1,0, 0, true);
+						m_swerve.driveAngle( -1,0, 0, false);
 						if(x <= -3.6){
 							autoVar ++;
 						}
 					break;
 
 					case 2:
-						m_swerve.driveAngle( 0,0, 0, true);
+						m_swerve.driveAngle( 0,0, 0, false);
 					break;
 				}
 			break;
@@ -228,14 +235,14 @@ public class Robot extends TimedRobot {
 
 					case 1:
 						m_claw.clawStop();
-						m_swerve.driveAngle( -1,0, 0, true);
+						m_swerve.driveAngle( -1,0, 0, false);
 						if(x <= -3.6){
 							autoVar ++;
 						}
 					break;
 
 					case 2:
-						m_swerve.driveAngle( 0,0, 0, true);
+						m_swerve.driveAngle( 0,0, 0, false);
 					break;
 					}
 			break;
@@ -251,7 +258,13 @@ public class Robot extends TimedRobot {
 			case "placeDoNothingCube":
 				switch(autoVar){
 					case 0:
-						if(autonomousTimer <= .5){
+					m_wrist.set(WristPositions.backShootCube);
+					if(autonomousTimer >= .5)
+						autoVar++;
+					break;
+
+					case 1:
+						if(autonomousTimer <= 1.5 && autonomousTimer >= .5){
 							m_claw.clawStop();
 						}else{
 							m_claw.clawOuttake(ShooterSpeed.midShootAuto);
@@ -277,6 +290,16 @@ public class Robot extends TimedRobot {
 					break;
 				}
 			break;
+
+			case "crossTheLine": //WORK ON IT IN THE PITS
+				switch(autoVar){
+					case 0:
+						m_swerve.drive(.4, 0, 0, false);
+						if(autonomousTimer > 5)
+							m_swerve.drive(0, 0, 0, false);
+					break;
+				}
+			break;
 		}
 		autonomousTimer += 0.02;
 	}
@@ -285,24 +308,24 @@ public class Robot extends TimedRobot {
 		double modPitch = m_swerve.m_navx.getRoll();
 		switch(balVar){
 			case 0: // hits
-				m_swerve.drive(-1, 0, -0, true);
+				m_swerve.drive(-1, 0, 0, false);
 				if(modPitch < -10)
 					balVar++;
 			break;
 
 			case 1: //half on
-				m_swerve.drive(-.6, 0, 0, true);
+				m_swerve.drive(-.6, 0, 0, false);
 				if(modPitch > -8)
 					balVar++;
 			break;
 
 			case 2: // slght balanced
-				if(modPitch > 2){
-					m_swerve.drive(.2, 0, 0, true);
-				}else if(modPitch < -2){
-					m_swerve.drive(-.2, 0, 0, true);
+				if(modPitch < -2){
+					m_swerve.drive(-.2, 0, 0, false);
+				}else if(modPitch > 2){
+					m_swerve.drive(.2, 0, 0, false);
 				}else{
-					m_swerve.drive(0, 0, 0, true);
+					m_swerve.drive(0, 0, 0, false);
 				}
 			break;
 
@@ -318,9 +341,9 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 
 		m_swerve.updateOdometry();
-		if (m_driveController.slowMidSpeed()) // sets to fast speed: 4.2 m/s
+		if (m_driveController.shifter()) // sets to fast speed: 4.2 m/s
 			speedMult = 1;
-		speedShift(m_driveController.shifter());
+		speedShift(m_driveController.slowMidSpeed());
 
 		switch(driveCase){
 
@@ -360,7 +383,6 @@ public class Robot extends TimedRobot {
 
 			// Cube
 			case 3:
-				System.out.println("Cube");
 				visionControlled = true;
 				if(m_bbRight.vision1()){
 					driveCase = 5;
@@ -371,7 +393,6 @@ public class Robot extends TimedRobot {
 
 			// Cone
 			case 4:
-				System.out.println("Cone");
 				visionControlled = true;
 				if(m_bbRight.vision2()){
 					driveCase = 6;
@@ -467,14 +488,15 @@ public class Robot extends TimedRobot {
 			m_fourBar.setLevel(MoveFourBars.substation);
 		if (m_bbLeft.armRectract())
 			m_fourBar.setLevel(MoveFourBars.ground);
-		/*
+		
 		if(m_bbLeft.blingCone()){
 			m_bling.blingSend(1);
 		}
 		if(m_bbLeft.blingCube()){
 			m_bling.blingSend(2);
 		}
-		*/
+		
+		
 
 		m_fourBar.run();
 
@@ -484,10 +506,11 @@ public class Robot extends TimedRobot {
 			m_driveController.setRumble(RumbleType.kBothRumble, 0);
 		}
 
+		m_bling.blingRan();
 	}
 
 	public void speedShift(boolean getRawButtonReleased) {
-		
+		speedVar = 0;
 
 		switch (speedVar) {
 			case 0:

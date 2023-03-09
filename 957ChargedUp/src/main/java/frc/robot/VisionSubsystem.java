@@ -150,7 +150,6 @@ public class VisionSubsystem {
 
 			// Get a set position for the robot, then set wrist position
 			case 0:
-				System.out.println("Case 0");
 				if(lockOnApriltag(swerve, limelight, .75)){	
 					cubeCase = 1;
 				}
@@ -159,7 +158,6 @@ public class VisionSubsystem {
 			
 			// Drive to set position, then go up against grid
 			case 1:
-				System.out.println("Case 1");
 				lockOnTimer = 0;
 				if(swerve.driveToPosition(0, cubePosition[0], 1, 0.05)){
 					cubeCase = 0;

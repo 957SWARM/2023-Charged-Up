@@ -25,6 +25,7 @@ public class Shuffleboard {
     m_autoChooser.addOption("Do Nothing", "doNothing");
     m_autoChooser.addOption("Only Place Cube", "placeDoNothingCube");
     m_autoChooser.addOption("Only Place Cone", "placeDoNothingCone");
+    m_autoChooser.addOption("crossTheLinePlease", "crossTheLine");
 
     SmartDashboard.putData(m_autoChooser);
 
@@ -37,7 +38,7 @@ public class Shuffleboard {
   }
 
 
-  public static void updateShuffleboard(Drivetrain d, Claw c, String wp, String mfb, VisionSubsystem v, int speedVar) 
+  public void updateShuffleboard(Drivetrain d, Claw c, String wp, String mfb, VisionSubsystem v, int speedVar) 
     {  
 
         //BLING BOARD (placeholder value)
@@ -79,10 +80,11 @@ public class Shuffleboard {
         // VISION
         SmartDashboard.putNumber("X position", d.xPosition);
         SmartDashboard.putNumber("Target", v.cubePosition[0]);
+
+        SmartDashboard.putNumber("Gyro Roll", d.m_navx.getRoll());
     }
 
   public String updateAuto(){
-    System.out.println(m_autoChooser.getSelected());
     return m_autoChooser.getSelected();
   }
 }
