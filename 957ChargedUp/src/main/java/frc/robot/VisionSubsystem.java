@@ -10,7 +10,7 @@ public class VisionSubsystem {
 	private final SlewRateLimiter m_slewTY = new SlewRateLimiter(3);
     int aprilTagCase = 0;
     int retroTapeCase = 0;
-	int cubeCase = 0;
+	int positionCase = 0;
 	int coneCase = 0;
     double aprilTagTX = 0;
 	double aprilTagTY = 0;
@@ -52,7 +52,7 @@ public class VisionSubsystem {
     public void resetCases(){
         aprilTagCase = 0;
         retroTapeCase = 0;
-		cubeCase = 0;
+		positionCase = 0;
     }
 	
     public boolean AprilTagTracking(Drivetrain swerve, Limelight limelight){
@@ -144,23 +144,24 @@ public class VisionSubsystem {
 		return false;
 	}
 
-	public boolean manipulateCubes(WristPositions wristPosition, Drivetrain swerve, Limelight limelight, Wrist wrist){
+	// Drives to be in line with April Tag plus offset in meters
+	public boolean positionFromAT(Drivetrain swerve, Limelight limelight, double offset){
 		limelight.setPipe(0);
-		switch(cubeCase){
+		switch(positionCase){
 
-			// Get a set position for the robot, then set wrist position
+			// Get a set position for the robot
 			case 0:
 				if(lockOnApriltag(swerve, limelight, .75)){	
-					cubeCase = 1;
+					positionCase = 1;
 				}
 
 			break;
 			
-			// Drive to set position, then go up against grid
+			// Align with april tag plus offset
 			case 1:
 				lockOnTimer = 0;
-				if(swerve.driveToPosition(0, cubePosition[0], 1, 0.05)){
-					cubeCase = 0;
+				if(swerve.driveToPosition(0, cubePosition[0] + offset, 1, 0.05)){
+					positionCase = 0;
 					return true;
 				}
 
