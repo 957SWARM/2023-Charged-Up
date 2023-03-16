@@ -78,7 +78,6 @@ public class DriveController extends Joystick {
     }
 
     public boolean centerGyro(){
-        System.out.println("center");
         return super.getRawButton(centerGyro);
     }
 }

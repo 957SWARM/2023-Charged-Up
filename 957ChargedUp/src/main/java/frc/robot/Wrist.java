@@ -5,6 +5,10 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
@@ -17,6 +21,7 @@ public class Wrist{
     SparkMaxPIDController m_wristPIDController = m_wristMotor.getPIDController();
     RelativeEncoder wristEncoder = m_wristMotor.getEncoder();
 
+    PIDController m_wristNewPID = new PIDController(1, 0, 0);
     
     double targetPosition = 0;
     WristPositions wristPos = WristPositions.retract;
@@ -46,8 +51,9 @@ public class Wrist{
     public String getLabel(){
         return wristPos.text();
     }
-    public void run(){
-       m_wristPIDController.setReference(targetPosition, ControlType.kSmartMotion);
+    public void run(double clawPosition){
+        m_wristNewPID.calculate(targetPosition, targetPosition);
+     // m_wristPIDController.setReference(targetPosition, ControlType.kSmartMotion);
         // m_wristPIDController.setReference(targetPosition, CANSparkMax.ControlType.kSmartMotion, 0, calculateFF(wristEncoder.getPosition()), SparkMaxPIDController.ArbFFUnits.kPercentOut);
     }
 }

@@ -1,13 +1,16 @@
 package frc.robot;
 
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import frc.robot.Constants.ShooterSpeed;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -19,12 +22,13 @@ public class Claw {
     TalonSRX clawFollower = new TalonSRX(12);
     DigitalInput m_limitSwitch = new DigitalInput(0);
 
-
     public Claw(){
         clawFollower.follow(clawMain);
         clawFollower.setInverted(true);
         clawMain.setNeutralMode(NeutralMode.Brake);
         clawFollower.setNeutralMode(NeutralMode.Brake);
+        clawMain.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 20);
+		clawMain.setSensorPhase(true);
 
     }
     
@@ -53,4 +57,7 @@ public class Claw {
         clawMain.set(TalonSRXControlMode.PercentOutput, -.05);
     }
     
+    public double clawPosition(){
+        return clawMain.getSelectedSensorPosition();
+    }
 }
