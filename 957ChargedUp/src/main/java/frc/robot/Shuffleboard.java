@@ -12,6 +12,7 @@ public class Shuffleboard {
   SendableChooser<String> m_autoChooser = new SendableChooser<>();
   static Boolean cubeMode = false;
   static Boolean turnMode = false;
+  double takenIntakeFudge = 0;
   
 
   // Run when shuffleboard is first initialized
@@ -31,8 +32,7 @@ public class Shuffleboard {
 
     // Put chooser on dashboard
 
-    SmartDashboard.putString("Ally 1", "0");
-    SmartDashboard.putString("Ally 2", "0");
+    SmartDashboard.putNumber("Intake Fudge", 0);
 
 
   }
@@ -82,6 +82,8 @@ public class Shuffleboard {
         SmartDashboard.putNumber("Target", v.cubePosition[0]);
 
         SmartDashboard.putNumber("Gyro Roll", d.m_navx.getRoll());
+
+        takenIntakeFudge = SmartDashboard.getNumber("Intake Fudge", 0);
     }
 
   public String updateAuto(){

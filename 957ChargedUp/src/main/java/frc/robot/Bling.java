@@ -44,12 +44,12 @@ public class Bling {
             if(message == 1){
                 m_DIO1.set(true);
                 m_DIO2.set(false);
-                System.out.println("DIO1 SET HIGH");
+                // System.out.println("DIO1 SET HIGH");
                 timer.reset();
             }else if(message == 2){
                 m_DIO1.set(false);
                 m_DIO2.set(true);
-                System.out.println("DIO2 SET HIGH");
+               // System.out.println("DIO2 SET HIGH");
                 timer.reset();
             }
         }

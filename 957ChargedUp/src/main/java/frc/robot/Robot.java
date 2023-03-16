@@ -45,10 +45,12 @@ public class Robot extends TimedRobot {
 	//FULL LIST OF ACCESSABLE AUTOS
 	String midAutoPart1 = "pathplanner/generatedJSON/midAutoPart1.wpilib.json";
 	String midAutoPart2 = "pathplanner/generatedJSON/midAutoPart2.wpilib.json";
+	String doubleCubeAuto = "pathplanner/generatedJSON/doubleCubeAuto.wpilib.json";
 	Trajectory trajectory = new Trajectory();
 	String autoToBeRan;
 	double autonomousTimer = 0;
 	double teleopTimer = 0;
+	double intakeFudge = 0;
 
 	HolonomicDriveController controller = new HolonomicDriveController(
 			new PIDController(0.032, 0, 0), new PIDController(-0.000, 0, 0),
@@ -84,6 +86,7 @@ public class Robot extends TimedRobot {
 
 	Trajectory currentPath;
 	Trajectory currentPath2;
+	Trajectory currentPath3;
 
 	SlewRateLimiter slew = new SlewRateLimiter(5);
 
@@ -123,6 +126,17 @@ public class Robot extends TimedRobot {
 		autoToBeRan = m_shuffle.updateAuto();
 		m_shuffle.updateShuffleboard(m_swerve, m_claw, m_wrist.getLabel() , m_fourBar.getLabel(), m_vision, speedVar);
 		SmartDashboard.putNumber("roll of bot", m_swerve.m_navx.getRoll());
+
+		if(m_shuffle.takenIntakeFudge >= .5){	// Make sure shuffleboard value is reasonable
+			intakeFudge = .5;
+		}
+		else if(m_shuffle.takenIntakeFudge <= -.4){
+			intakeFudge = -.4;
+		}
+		else{
+			intakeFudge = m_shuffle.takenIntakeFudge;
+		}
+
 	}
 
 	@Override
@@ -132,8 +146,9 @@ public class Robot extends TimedRobot {
 
 		currentPath = getPath(midAutoPart1);
 		currentPath2 = getPath(midAutoPart2);
+		currentPath3 = getPath(doubleCubeAuto);
 		autoVar = 0;
-		if(autoToBeRan != "placeDoNothingCones" && autoToBeRan != "coneLeft" && autoToBeRan != "coneRight" && autoToBeRan != "mid"){
+		if(autoToBeRan != "placeDoNothingCones" && autoToBeRan != "coneLeft" && autoToBeRan != "coneRight" && autoToBeRan != "mid" && autoToBeRan != "cubeMidHigh"){
 			m_swerve.centerGyro(0);
 			m_claw.cubeMode();
 		}else{
@@ -148,7 +163,7 @@ public class Robot extends TimedRobot {
 		double x = m_swerve.getPose().getX();
 		double y = m_swerve.getPose().getY();
 		m_fourBar.run();
-		m_wrist.run();
+		m_wrist.run(0);
 
 		switch(autoToBeRan){
 			
@@ -300,10 +315,48 @@ public class Robot extends TimedRobot {
 					break;
 				}
 			break;
-		}
+
+			case "cubeMidHigh":
+				switch(autoVar){
+					case 0:
+						if(autonomousTimer == 0)
+							m_claw.cubeMode();
+						else if(autonomousTimer >= 0 && autonomousTimer < 3){
+							m_fourBar.setLevel(MoveFourBars.mid);
+							m_wrist.set(WristPositions.midCube);
+							m_claw.clawOuttake(ShooterSpeed.midCube);
+							}
+						else if(autonomousTimer >= 3 && autonomousTimer < 6){
+							m_fourBar.setLevel(MoveFourBars.ground);
+							m_wrist.set(WristPositions.retract);
+							}
+					break;
+					case 1:
+						if(autonomousTimer >= 6 && autonomousTimer < 8){
+							//drive
+							m_claw.clawIntake(0.5);
+						}				
+					break;	
+					case 2:
+						if(autonomousTimer >= 8 && autonomousTimer < 10){
+							//place cube high
+							m_fourBar.setLevel(MoveFourBars.high);		
+							m_wrist.set(WristPositions.highCube);
+							m_claw.clawOuttake(ShooterSpeed.highCube);
+						}
+					break;
+				}
+
+			break;
+		
+			}
 		autonomousTimer += 0.02;
+		
 	}
 
+			
+				
+				
 	public void autoBalance(){
 		double modPitch = m_swerve.m_navx.getRoll();
 		switch(balVar){
@@ -321,9 +374,9 @@ public class Robot extends TimedRobot {
 
 			case 2: // slght balanced
 				if(modPitch < -2){
-					m_swerve.drive(-.2, 0, 0, false);
+					m_swerve.drive(-.25, 0, 0, false);
 				}else if(modPitch > 2){
-					m_swerve.drive(.2, 0, 0, false);
+					m_swerve.drive(.25, 0, 0, false);
 				}else{
 					m_swerve.drive(0, 0, 0, false);
 				}
@@ -340,9 +393,12 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 
+		
 		m_swerve.updateOdometry();
-		if (m_driveController.shifter()) // sets to fast speed: 4.2 m/s
+		if (m_driveController.shifter()){ // sets to fast speed: 4.2 m/s
 			speedMult = 1;
+			speedVar = 0;
+		}
 		speedShift(m_driveController.slowMidSpeed());
 
 		switch(driveCase){
@@ -420,7 +476,7 @@ public class Robot extends TimedRobot {
 		}
 
 		if (m_driveController.clawIntake() > .5) { 
-			m_claw.clawIntake(.5);
+			m_claw.clawIntake(.5 + intakeFudge); // intakeFudge Change
 		} else if (m_driveController.highCube()) { 
 			m_claw.clawOuttake(ShooterSpeed.highCube);
 		} else if (m_driveController.midCube()) { 
@@ -478,7 +534,7 @@ public class Robot extends TimedRobot {
 		if(m_bbRight.pickupCube())
 			m_wrist.set(WristPositions.cubeGround);
 
-		m_wrist.run();
+		m_wrist.run(m_claw.clawPosition());
 
 		if (m_bbLeft.armMax())
 			m_fourBar.setLevel(MoveFourBars.high);
@@ -510,33 +566,30 @@ public class Robot extends TimedRobot {
 	}
 
 	public void speedShift(boolean getRawButtonReleased) {
-		speedVar = 0;
 
 		switch (speedVar) {
 			case 0:
-				speedMult = 0.6;
-				if (m_driveController.shifter()) {
+				if (getRawButtonReleased) {
 					speedVar++;
 				}
 				break;
 
 			case 1:
 				speedMult = 0.6;
-				if (!m_driveController.shifter()) {
+				if (!getRawButtonReleased) {
 					speedVar++;
 				}
 				break;
 
 			case 2:
-				speedMult = 0.36;
-				if (m_driveController.shifter()) {
+				if (getRawButtonReleased) {
 					speedVar++;
 				}
 				break;
 
 			case 3:
 				speedMult = 0.36;
-				if (!m_driveController.shifter()) {
+				if (!getRawButtonReleased) {
 					speedVar = 0;
 				}
 				break;
