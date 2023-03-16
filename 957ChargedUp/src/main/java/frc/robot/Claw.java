@@ -27,8 +27,8 @@ public class Claw {
         clawFollower.setInverted(true);
         clawMain.setNeutralMode(NeutralMode.Brake);
         clawFollower.setNeutralMode(NeutralMode.Brake);
-        clawMain.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 20);
-		clawMain.setSensorPhase(true);
+        clawFollower.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+		// clawMain.setSensorPhase(true);
 
     }
     
@@ -58,6 +58,6 @@ public class Claw {
     }
     
     public double clawPosition(){
-        return clawMain.getSelectedSensorPosition();
+        return clawFollower.getSelectedSensorPosition();
     }
 }

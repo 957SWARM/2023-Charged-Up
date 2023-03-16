@@ -21,7 +21,7 @@ public class Wrist{
     SparkMaxPIDController m_wristPIDController = m_wristMotor.getPIDController();
     RelativeEncoder wristEncoder = m_wristMotor.getEncoder();
 
-    PIDController m_wristNewPID = new PIDController(1, 0, 0);
+    PIDController m_wristNewPID = new PIDController(0.001, 0, 0);
     
     double targetPosition = 0;
     WristPositions wristPos = WristPositions.retract;
@@ -51,9 +51,19 @@ public class Wrist{
     public String getLabel(){
         return wristPos.text();
     }
-    public void run(double clawPosition){
-        m_wristNewPID.calculate(targetPosition, targetPosition);
-     // m_wristPIDController.setReference(targetPosition, ControlType.kSmartMotion);
+
+    public void run(double clawPosition, double maxOut){
+
+        double output = m_wristNewPID.calculate(clawPosition, targetPosition);
+        if (output > maxOut){
+            output = maxOut;
+        }
+        else if (output < -maxOut){
+            output = -maxOut;
+        }
+        m_wristMotor.set(output);
+
+        // m_wristPIDController.setReference(targetPosition, ControlType.kSmartMotion);
         // m_wristPIDController.setReference(targetPosition, CANSparkMax.ControlType.kSmartMotion, 0, calculateFF(wristEncoder.getPosition()), SparkMaxPIDController.ArbFFUnits.kPercentOut);
     }
 }

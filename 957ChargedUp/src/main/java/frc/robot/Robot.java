@@ -163,7 +163,7 @@ public class Robot extends TimedRobot {
 		double x = m_swerve.getPose().getX();
 		double y = m_swerve.getPose().getY();
 		m_fourBar.run();
-		m_wrist.run(0);
+		m_wrist.run(m_claw.clawPosition(), .2);
 
 		switch(autoToBeRan){
 			
@@ -392,7 +392,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-
+		teleopTimer += .02;
 		
 		m_swerve.updateOdometry();
 		if (m_driveController.shifter()){ // sets to fast speed: 4.2 m/s
@@ -415,6 +415,9 @@ public class Robot extends TimedRobot {
 				else if(m_bbRight.vision2()){
 					driveCase = 2;
 				}
+				else if(m_bbRight.vision3()){
+					driveCase = 3;
+				}
 			break;
 
 			// Normal Driving but waiting for Cube button Unpress
@@ -423,42 +426,61 @@ public class Robot extends TimedRobot {
 				driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
 					-m_driveController.getRightStickX());
 				if(!m_bbRight.vision1()){
-					driveCase = 3;
+					driveCase = 4;
 				}
 
 			break;
 
-			// Normal Driving but waiting for Cone button Unpress
+			// Normal Driving but waiting for Cone right button Unpress
 			case 2:
 				visionControlled = false;
 				driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
 					-m_driveController.getRightStickX());
 				if(!m_bbRight.vision2()){
-					driveCase = 4;
+					driveCase = 5;
+				}
+			
+			// Normal Driving but waiting for Cone left button unpress
+			case 3:
+				visionControlled = false;
+				driveMode(m_driveController.getLeftStickX(), m_driveController.getLeftStickY(),
+					-m_driveController.getRightStickX());
+				if(!m_bbRight.vision3()){
+					driveCase = 6;
 				}
 
 			// Cube
-			case 3:
-				visionControlled = true;
-				if(m_bbRight.vision1()){
-					driveCase = 5;
-				}
-				if(m_vision.manipulateCubes(m_wrist.wristPos, m_swerve, m_limelight, m_wrist))
-					driveCase = 5;
-			break;
-
-			// Cone
 			case 4:
 				visionControlled = true;
-				if(m_bbRight.vision2()){
-					driveCase = 6;
+				if(m_bbRight.vision1()){
+					driveCase = 7;
 				}
-				if(m_vision.TapeTracking(m_wrist.wristPos, m_swerve, m_limelight, m_wrist))
-					driveCase = 6;
+				if(m_vision.positionFromAT(m_swerve, m_limelight, 0))
+					driveCase = 7;
+			break;
+
+			// Cone right
+			case 5:
+				visionControlled = true;
+				if(m_bbRight.vision2()){
+					driveCase = 8;
+				}
+				if(m_vision.positionFromAT(m_swerve, m_limelight, .56))
+					driveCase = 8;
+			break;
+
+			// Cone left
+			case 6:
+				visionControlled = true;
+				if(m_bbRight.vision2()){
+					driveCase = 9;
+				}
+				if(m_vision.positionFromAT(m_swerve, m_limelight, -.56))
+					driveCase = 9;
 			break;
 
 			// Cancel Case (Cubes)
-			case 5:
+			case 7:
 				visionControlled = false;
 				if(!m_bbRight.vision1()){
 					driveCase = 0;
@@ -466,13 +488,22 @@ public class Robot extends TimedRobot {
 
 			break;
 
-			// Cancel Case (Cones)
-			case 6:
+			// Cancel Case (Cone right)
+			case 8:
 				m_limelight.setPipe(0);
 				visionControlled = false;
 				if(!m_bbRight.vision2()){
 					driveCase = 0;
 				}
+			
+			// Cancel Case (Cone left)
+			case 9:
+				m_limelight.setPipe(0);
+				visionControlled = false;
+				if(!m_bbRight.vision3()){
+					driveCase = 0;
+			}
+		
 		}
 
 		if (m_driveController.clawIntake() > .5) { 
@@ -534,7 +565,7 @@ public class Robot extends TimedRobot {
 		if(m_bbRight.pickupCube())
 			m_wrist.set(WristPositions.cubeGround);
 
-		m_wrist.run(m_claw.clawPosition());
+		m_wrist.run(m_claw.clawPosition(), 0.3);
 
 		if (m_bbLeft.armMax())
 			m_fourBar.setLevel(MoveFourBars.high);
@@ -552,11 +583,37 @@ public class Robot extends TimedRobot {
 			m_bling.blingSend(2);
 		}
 		
-		
+	/*	Code for new button board
+	
+		if (m_bbPlace.coneLow){
 
+		}
+		if (m_bbPlace.coneMid){
+
+		}
+		if (m_bbPlace.coneHigh){
+
+		}
+
+		if (m_bbPlace.cubeLow){
+			m_fourBar.setLevel(MoveFourBars.ground);
+			m_wrist.set(WristPositions.scoreOut);
+		}
+		if (m_bbPlace.cubeMid){
+			m_fourBar.setLevel(MoveFourBars.mid);
+			m_wrist.set(WristPositions.scoreOut);
+		}
+		if (m_bbPlace.cubeHigh){
+			m_fourBar.setLevel(MoveFourBars.high);
+			m_wrist.set(WristPositions.scoreUp)
+		}
+
+	*/	
+		
+	// Extra. Runs ARM, BLING, and Rumble 
 		m_fourBar.run();
 
-		if(teleopTimer >= 105 && teleopTimer <= 107){	
+		if(teleopTimer >= 95 && teleopTimer <= 97){	
 			m_driveController.setRumble(RumbleType.kBothRumble, 1);
 		}else{
 			m_driveController.setRumble(RumbleType.kBothRumble, 0);
@@ -599,19 +656,19 @@ public class Robot extends TimedRobot {
 	public void driveAngle(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
 
 		double[] arr = deadZone(xSpeed, ySpeed, 0.2);
-		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));
-		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
+		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(speedMult * xSpeed, 0.05));
+		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(speedMult * ySpeed, 0.05));
 
-		m_swerve.driveAngle(-ySpeed * speedMult * 4.2, -xSpeed * speedMult * 4.2, rot, fieldRelative);
+		m_swerve.driveAngle(-ySpeed * 4.2, -xSpeed * 4.2, rot, fieldRelative);
 	}
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
 
 
-		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(xSpeed, 0.05));
-		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(ySpeed, 0.05));
+		xSpeed = m_xspeedLimiter.calculate(MathUtil.applyDeadband(speedMult * xSpeed, 0.05));
+		ySpeed = m_yspeedLimiter.calculate(MathUtil.applyDeadband(speedMult * ySpeed, 0.05));
 		rot = m_rotLimiter.calculate(MathUtil.applyDeadband(rot, 0.2));
-		m_swerve.drive(-ySpeed * speedMult * 4.2, -xSpeed * speedMult * 4.2, rot * 6.28 * speedMult, fieldRelative);
+		m_swerve.drive(-ySpeed * 4.2, -xSpeed * 4.2, rot * 6.28 * speedMult, fieldRelative);
 	}
 
 	public double joyAngle(double x, double y) {
@@ -671,9 +728,6 @@ public class Robot extends TimedRobot {
 
 	@Override 
 	public void testPeriodic(){
-		//test for rumble
-		if(DriverStation.getMatchTime() <= 30 && DriverStation.getMatchTime() >= 25){
-			m_driveController.setRumble(RumbleType.kBothRumble, 1);
-		}
+		System.out.println(m_claw.clawPosition());
 	}
 }

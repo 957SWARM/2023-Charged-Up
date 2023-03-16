@@ -34,10 +34,10 @@ import frc.robot.Constants.MiniPID;
 	private final Translation2d m_backLeftLocation = new Translation2d(-0.3302, 0.3302);
 	private final Translation2d m_backRightLocation = new Translation2d(-0.3302, -0.3302);
 
-	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.304) * 6.28);	// .304
-	private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.895-0.25) * 6.28);	// .556
-	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.826+0.5) * 6.28);	//0.826
-	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.893+0.25) * 6.28);	//.893
+	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.305) * 6.28);	// .
+	private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.518-0.25) * 6.28);	// .
+	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.977+0.5) * 6.28);	//0.
+	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.688+0.25) * 6.28);	//.
 
 	AHRS m_navx = new AHRS(Port.kMXP);
 	PIDController tapePID = new PIDController(0.1, 0, 0);
