@@ -27,6 +27,7 @@ public class Shuffleboard {
     m_autoChooser.addOption("Only Place Cube", "placeDoNothingCube");
     m_autoChooser.addOption("Only Place Cone", "placeDoNothingCone");
     m_autoChooser.addOption("crossTheLinePlease", "crossTheLine");
+    m_autoChooser.addOption("Rad Auto", "CoolRadicalMidMobility");
 
     SmartDashboard.putData(m_autoChooser);
 
@@ -38,7 +39,7 @@ public class Shuffleboard {
   }
 
 
-  public void updateShuffleboard(Drivetrain d, Claw c, String wp, String mfb, VisionSubsystem v, int speedVar) 
+  public void updateShuffleboard(Drivetrain d, Claw c, String wp, String mfb, VisionSubsystem v, int speedVar, Wrist w, FourBar fb) 
     {  
 
         //BLING BOARD (placeholder value)
@@ -69,16 +70,19 @@ public class Shuffleboard {
         
         //BOT ANGLE AND WHEEL ANGLES
         SmartDashboard.putNumber("Bot Angle", d.m_navx.getAngle());
-        SmartDashboard.putNumber("FL", d.getFrontLeftSwerveModuleAngle());
-        SmartDashboard.putNumber("FR", d.getFrontRightSwerveModuleAngle());
-        SmartDashboard.putNumber("BL", d.getBackLeftSwerveModuleAngle());
-        SmartDashboard.putNumber("BR", d.getBackRightSwerveModuleAngle());
+        // SmartDashboard.putNumber("FL", d.getFrontLeftSwerveModuleAngle());
+        // SmartDashboard.putNumber("FR", d.getFrontRightSwerveModuleAngle());
+        // SmartDashboard.putNumber("BL", d.getBackLeftSwerveModuleAngle());
+        // SmartDashboard.putNumber("BR", d.getBackRightSwerveModuleAngle());
 
         // Limit Switches
-        SmartDashboard.putBoolean("Wrist Limit Switch", c.m_limitSwitch.get());
+        SmartDashboard.putBoolean("Piece?", c.m_limitSwitch.get());
+        SmartDashboard.putBoolean("Wrist Limit Switch", w.m_limitSwitch.get());
+        SmartDashboard.putBoolean("Four Bar LS", fb.m_limitSwitch.get());
+
         
         // VISION
-        SmartDashboard.putNumber("X position", d.xPosition);
+        SmartDashboard.putNumber("X position", d.getPose().getY());
         SmartDashboard.putNumber("Target", v.cubePosition[0]);
 
         SmartDashboard.putNumber("Gyro Roll", d.m_navx.getRoll());

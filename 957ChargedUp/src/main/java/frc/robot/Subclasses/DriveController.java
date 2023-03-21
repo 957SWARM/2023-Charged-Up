@@ -25,6 +25,16 @@ public class DriveController extends Joystick {
     static int centerGyro = 7; // Left top button (by xbox button)
 
 
+    public boolean wingToggle(){
+        if(super.getPOV() != -1){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+
+
     public boolean clawToggle(){
         return super.getRawButton(clawToggle);
     }

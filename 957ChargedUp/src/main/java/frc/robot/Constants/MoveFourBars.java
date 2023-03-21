@@ -3,7 +3,7 @@ package frc.robot.Constants;
 public enum MoveFourBars{
     //bar height levels
     substation(15, "Substation Position"), 
-    ground( 0.1, "Ground Position"), 
+    ground( 0.1, "Ground Position"), //IF YOU CHANGE THIS, ALSO CHANGE LIMIT SWITCH VALUE PLEASE
     mid( 29, "Mid Position"), 
     high(46, "High Position");
     

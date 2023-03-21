@@ -1,15 +1,16 @@
 package frc.robot.Constants;
 public enum WristPositions {
 
-    retract(11 , "retract"),
-    scoreUp(1060, "scoreUp"),//9
+    retract(10 , "retract"), //IF YOU CHANGE THIS, ALSO CHANGE LIMIT SWITCH VALUE PLEASE
+    scoreUp(1060, "scoreUp"),   //9
+    scoreSub(1150, "scoreSub"),
     scoreOut(1520, "scoreOut"),
     highCube(9, "highCube"),
     midCube(14, "midCube"),
     substation(14.5, "substation"),
-    coneGround(2050, "cone groudn"),
+    coneGround(2000, "cone ground"),
     backShootCube(3, "back shoot"),
-    cubeGround(1800,"cube ground");
+    cubeGround(1950,"cube ground");
 
 
     private final double wristTargetSetpoint;

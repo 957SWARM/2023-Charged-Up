@@ -37,7 +37,7 @@ import frc.robot.Constants.MiniPID;
 	private final MAXSwerveModule m_frontRight = new MAXSwerveModule(1, 2, (1-0.305) * 6.28);	// .
 	private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(3, 4, (1-0.518-0.25) * 6.28);	// .
 	private final MAXSwerveModule m_backLeft = new MAXSwerveModule(5, 6, (1-0.977+0.5) * 6.28);	//0.
-	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.688+0.25) * 6.28);	//.
+	private final MAXSwerveModule m_backRight = new MAXSwerveModule(7, 8, (1-0.742+0.25) * 6.28);	//.
 
 	AHRS m_navx = new AHRS(Port.kMXP);
 	PIDController tapePID = new PIDController(0.1, 0, 0);
@@ -87,8 +87,14 @@ import frc.robot.Constants.MiniPID;
 
 
 
-	public void driveAngle(double xSpeed, double ySpeed, double angle, boolean fieldRelative){
+	public void driveAngle(double xSpeed, double ySpeed, double angle, boolean fieldRelative, double maxRotSpeed){
 		double pidAngle = -visionPID.getOutput((m_navx.getAngle() + angleOffset * 360) % 360, angle);
+		if (pidAngle >= maxRotSpeed){
+			pidAngle = maxRotSpeed;
+		}
+		else if (pidAngle <= -maxRotSpeed){
+			pidAngle = -maxRotSpeed;
+		}
 		var swerveModuleStates =
 			m_kinematics.toSwerveModuleStates(
 				fieldRelative
@@ -283,7 +289,7 @@ import frc.robot.Constants.MiniPID;
 			return true;
 		}
 
-		driveAngle(0, motorOutput, 180, false);	
+		driveAngle(0, motorOutput, 180, false, .3);	
 		return false;
 	}
 
@@ -299,7 +305,7 @@ import frc.robot.Constants.MiniPID;
 		switch(wallstate){
 			case 0:
 	
-				driveAngle(speed, 0, 0, false);
+				driveAngle(speed, 0, 0, false, .3);
 				timer += 0.02;
 				if(timer > length){
 					wallstate = 1;
@@ -309,7 +315,7 @@ import frc.robot.Constants.MiniPID;
 			  break;
 			case 1:
 			
-				driveAngle(speed, 0, 0, false);
+				driveAngle(speed, 0, 0, false, .3);
 				timer = 0;
 				if(velocityChecker(n, speed)){
 					wallstate = 0;

@@ -3,9 +3,10 @@ public enum ShooterSpeed {
 
     placeCube(0.2  , "place cube"),
     teleopEject(.5 , "Teleop Eject"), //.7
+    midCubeSlower(.4, "Mid Cube Slow"),
     midCube(.5, "Mid Cube"),
     midShootAuto(.5, "midShootAuto"),
-    highCube(.7, "High Cube");
+    highCube(1, "High Cube");
 
     private final double speed;
     private final String m_identifer;
