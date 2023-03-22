@@ -47,6 +47,8 @@ public class Robot extends TimedRobot {
 	private final ButtonBoardLeftNew m_bbLeft = new ButtonBoardLeftNew(1);
 	private final ButtonBoardRightNew m_bbRight = new ButtonBoardRightNew(2);
 	private final Wing m_wing = new Wing(2, 3);
+	private final DroneDrive drone = new DroneDrive();
+
 
 	//FULL LIST OF ACCESSABLE AUTOS
 	String midAutoPart1 = "pathplanner/generatedJSON/midAutoPart1.wpilib.json";
@@ -213,7 +215,7 @@ public class Robot extends TimedRobot {
 	
 			break;
 
-			case "coneLeft":
+			case "coneLeftBlue":
 				switch(autoVar){
 					case 0:
 						// RAISES ARM and WRIST
@@ -273,57 +275,172 @@ public class Robot extends TimedRobot {
 					break;
 
 					case 4:
+					if (autonomousTimer < 2){
 						m_swerve.driveAngle(.5, 0, 25, false, .3);
-						m_claw.clawIntake(1);
-						if (autonomousTimer > 2){
-							m_claw.clawIntake(1);
-							m_swerve.drive(0, 0, 0, false);
-							// m_wrist.set(WristPositions.cubeGround);
-							// m_claw.clawIntake(.5);
+						m_claw.clawIntake(.4);
+					}else{
+						m_claw.clawIntake(.4);
+						m_swerve.drive(0, 0, 0, false);
+						if (!m_claw.m_limitSwitch.get()){
+							m_wrist.set(WristPositions.retract);
+							m_claw.clawStop();
 						}
+					}	
 					break;
 				}		
 			break;
 		
 	
-			case "coneRight":
+			case "coneRightBlue":
 				switch(autoVar){
 					case 0:
-						if(autonomousTimer == 0)
-							m_claw.coneMode();
-						if(autonomousTimer >= 0 && autonomousTimer < 3){
+						System.out.println("Cone Right");
+						// RAISES ARM and WRIST
+						if(autonomousTimer >= 0 && autonomousTimer < 2){
 							m_fourBar.setLevel(MoveFourBars.mid);
-							m_wrist.set(WristPositions.scoreUp);
-						}else if( autonomousTimer >= 3 && autonomousTimer < 4){
+						// DUNKS CONE
+						}else if( autonomousTimer >= 2 && autonomousTimer < 3.5){
+							m_wrist.set(WristPositions.scoreOut);
+						// DROPS CONE
+						}else if( autonomousTimer >= 3.5 && autonomousTimer < 4.5){
 							m_claw.cubeMode();
-						}else if( autonomousTimer >= 4 && autonomousTimer < 7.5){
-							m_fourBar.setLevel(MoveFourBars.ground);
+						// RETRACT
+						}else if( autonomousTimer >= 4.5 && autonomousTimer < 5){
 							m_wrist.set(WristPositions.retract);
-						}else if(autonomousTimer >= 7.5){
+						}else if( autonomousTimer >= 5 && autonomousTimer < 7){
+							m_fourBar.setLevel(MoveFourBars.ground);
+						}else if(autonomousTimer >= 7){
+							autonomousTimer = 0;
 							autoVar++;
-						}
-							
+						}	
+	
 					break;
 
+					// 
 					case 1:
 						m_claw.clawStop();
-						m_swerve.driveAngle( -1,0, 0, false, .3);
-						if(x <= -3.6){
+						if (autonomousTimer < .8){
+							m_swerve.driveAngle( 2, 0, 180, true, 1);
+						}
+						else{
+							m_swerve.driveAngle(2, autoPID.getOutput(y, 0), 356, true, 2);
+
+						}
+						if(x >= 3.6){
+							autonomousTimer = 0;
 							autoVar ++;
 						}
 					break;
 
 					case 2:
-						m_swerve.driveAngle( 0,0, 0, false, .3);
+						m_swerve.driveAngle(0, 0, 356, true, 4);
+						if (autonomousTimer > .75){
+							autonomousTimer = 0;
+							autoVar++;
+						}
 					break;
-					}
+
+					case 3:
+						if (m_wrist.getLabel() != "cube ground"){
+							m_wrist.set(WristPositions.cubeGround);
+						}
+						if (autonomousTimer > .5){
+							autonomousTimer = 0;
+							m_claw.clawIntake(.4);
+							autoVar++;
+						}
+					break;
+
+					case 4:
+						if (autonomousTimer < 2.3){
+							m_swerve.driveAngle(.5, 0, 356, false, .3);
+							m_claw.clawIntake(.4);
+						}else{
+							m_claw.clawIntake(.4);
+							m_swerve.drive(0, 0, 0, false);
+							if (!m_claw.m_limitSwitch.get()){
+								m_wrist.set(WristPositions.retract);
+								m_claw.clawStop();
+							}
+						}	
+					break;
+				}	
 			break;
 
-			case "doNothing":
-				switch(autoVar){
-					case 0:
-					break;
-				}
+			case "coneLeftRed":
+			switch(autoVar){
+				case 0:
+					// System.out.println("Cone Right");
+					// RAISES ARM and WRIST
+					if(autonomousTimer >= 0 && autonomousTimer < 2){
+						m_fourBar.setLevel(MoveFourBars.mid);
+					// DUNKS CONE
+					}else if( autonomousTimer >= 2 && autonomousTimer < 3.5){
+						m_wrist.set(WristPositions.scoreOut);
+					// DROPS CONE
+					}else if( autonomousTimer >= 3.5 && autonomousTimer < 4.5){
+						m_claw.cubeMode();
+					// RETRACT
+					}else if( autonomousTimer >= 4.5 && autonomousTimer < 5){
+						m_wrist.set(WristPositions.retract);
+					}else if( autonomousTimer >= 5 && autonomousTimer < 7){
+						m_fourBar.setLevel(MoveFourBars.ground);
+					}else if(autonomousTimer >= 7){
+						autonomousTimer = 0;
+						autoVar++;
+					}	
+
+				break;
+
+				// 
+				case 1:
+					m_claw.clawStop();
+					if (autonomousTimer < .8){
+						m_swerve.driveAngle( 2, 0, 180, true, 1);
+					}
+					else{
+						m_swerve.driveAngle(2, autoPID.getOutput(y, 0), 356, true, 2);
+
+					}
+					if(x >= 3.6){
+						autonomousTimer = 0;
+						autoVar ++;
+					}
+				break;
+
+				case 2:
+					m_swerve.driveAngle(0, 0, 356, true, 4);
+					if (autonomousTimer > .75){
+						autonomousTimer = 0;
+						autoVar++;
+					}
+				break;
+
+				case 3:
+					if (m_wrist.getLabel() != "cube ground"){
+						m_wrist.set(WristPositions.cubeGround);
+					}
+					if (autonomousTimer > .5){
+						autonomousTimer = 0;
+						m_claw.clawIntake(.4);
+						autoVar++;
+					}
+				break;
+
+				case 4:
+					if (autonomousTimer < 2.3){
+						m_swerve.driveAngle(.5, 0, 356, false, .3);
+						m_claw.clawIntake(.4);
+					}else{
+						m_claw.clawIntake(.4);
+						m_swerve.drive(0, 0, 0, false);
+						if (!m_claw.m_limitSwitch.get()){
+							m_wrist.set(WristPositions.retract);
+							m_claw.clawStop();
+						}
+					}	
+				break;
+			}	
 			break;
 			
 
@@ -408,11 +525,10 @@ public class Robot extends TimedRobot {
 		
 			// New mid with MOBILITY!
 			case "CoolRadicalMidMobility":
-			m_claw.cubeMode();
+			m_claw.coneMode();
 				switch(autoVar){
 					// ARM and WRIST in position
 					case 0:
-						m_fourBar.setLevel(MoveFourBars.mid);
 						m_wrist.set(WristPositions.scoreUp);
 						if(autonomousTimer >= 1.75)	//prev 2
 							autoVar++;
@@ -420,7 +536,7 @@ public class Robot extends TimedRobot {
 
 					// PLACES Cube
 					case 1:
-						m_claw.clawOuttake(ShooterSpeed.midCubeSlower);
+						m_claw.clawOuttake(ShooterSpeed.highCube);
 						if(autonomousTimer >= 3.0)	// prev 3.5
 							autoVar++;
 					break;
@@ -428,7 +544,6 @@ public class Robot extends TimedRobot {
 					// RETRACT ARM and WRIST
 					case 2:
 						m_claw.clawStop();
-						m_fourBar.setLevel(MoveFourBars.ground);
 						m_wrist.set(WristPositions.retract);
 						m_swerve.driveAngle(2, 0, 180, true, 0);
 						if (x >= 3.6){
@@ -622,7 +737,8 @@ public class Robot extends TimedRobot {
 			m_claw.clawOuttake(ShooterSpeed.placeCube);
 		}else if (m_driveController.clawIntakeStop() > .5 || m_claw.m_limitSwitch.get() == false) { // right trigger
 			m_claw.clawStop();
-		}else if(m_driveController.centerGyro()){
+		}
+		if(m_driveController.centerGyro()){
 			m_swerve.centerGyro(0);
 		}
 		// System.out.println("Case " + wingVar);
@@ -847,7 +963,7 @@ public class Robot extends TimedRobot {
 		else if (ySpeed < -speedMult){
 			ySpeed = -speedMult;
 		}
-		m_swerve.driveAngle(-ySpeed * 4.2, -xSpeed * 4.2, rot, fieldRelative, .3);
+		m_swerve.driveAngle(-ySpeed * 4.2, -xSpeed * 4.2, rot, fieldRelative, 1);
 	}
 
 	public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
@@ -899,23 +1015,23 @@ public class Robot extends TimedRobot {
 			case 0:
 				drive(x, y, rot, true);
 				if (m_driveController.driveStyle())
-					driveVar++;
+					// driveVar++;
 				break;
 
 			case 1:
 				drive(x, y, rot, true);
 				if (!m_driveController.driveStyle())
-					driveVar++;
+					// driveVar++;
 				break;
 
 			case 2:
-				driveAngle(x, y, joyAngle(Math.round(m_driveController.getRightStickX()), Math.round(m_driveController.getRightStickY())), true);
+				driveAngle(x, y, drone.calculateAngle(Math.round(m_driveController.getRightStickX()), Math.round(m_driveController.getRightStickY()), m_swerve.m_navx.getAngle()), true);
 				if (m_driveController.driveStyle())
 					driveVar++;
 				break;
 
 			case 3:
-				driveAngle(x, y, joyAngle(Math.round(m_driveController.getRightStickX()), m_driveController.getRightStickY()), true);
+				driveAngle(x, y, drone.calculateAngle(Math.round(m_driveController.getRightStickX()), m_driveController.getRightStickY(), m_swerve.m_navx.getAngle()), true);
 				if (!m_driveController.driveStyle())
 					driveVar = 0;
 				break;

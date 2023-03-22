@@ -6,7 +6,7 @@ public enum ShooterSpeed {
     midCubeSlower(.4, "Mid Cube Slow"),
     midCube(.5, "Mid Cube"),
     midShootAuto(.5, "midShootAuto"),
-    highCube(1, "High Cube");
+    highCube(.55, "High Cube");
 
     private final double speed;
     private final String m_identifer;

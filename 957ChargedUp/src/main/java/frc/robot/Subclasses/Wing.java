@@ -10,13 +10,13 @@ public class Wing extends DoubleSolenoid{
     }
 
     public void extendWing(){
-        System.out.println("Extend");
+        // System.out.println("Extend");
         if(super.get() != Value.kForward)
             super.set(Value.kForward);
     }
 
     public void retractWing(){
-        System.out.println("Retract");
+        // System.out.println("Retract");
         if(super.get() != Value.kReverse)
             super.set(Value.kReverse);
     }

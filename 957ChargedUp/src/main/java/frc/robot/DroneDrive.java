@@ -9,7 +9,7 @@ public class DroneDrive {
     double previousOutput = 0;
     //double robotAngle = -425; //manually setting robot angle
 
-    public double convertToUnitCircleAngle(double joystickAngle) {
+    private double convertToUnitCircleAngle(double joystickAngle) {
         double unitCircleAngle = 90 - joystickAngle;
         if (unitCircleAngle < 0) {
             unitCircleAngle += 360;
@@ -17,7 +17,7 @@ public class DroneDrive {
         return unitCircleAngle;
     }
 
-    public double findClosestPath(double robotAngle, double targetAngle){
+    private double findClosestPath(double robotAngle, double targetAngle){
 
         double diff = Math.toRadians(robotAngle - targetAngle);
         double closestPath = Math.round(Math.toDegrees(Math.atan2(Math.sin(diff), Math.cos(diff))));

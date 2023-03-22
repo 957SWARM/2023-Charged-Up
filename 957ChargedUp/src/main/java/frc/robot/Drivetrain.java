@@ -88,7 +88,7 @@ import frc.robot.Constants.MiniPID;
 
 
 	public void driveAngle(double xSpeed, double ySpeed, double angle, boolean fieldRelative, double maxRotSpeed){
-		double pidAngle = -visionPID.getOutput((m_navx.getAngle() + angleOffset * 360) % 360, angle);
+		double pidAngle = -visionPID.getOutput((m_navx.getAngle() + angleOffset * 360), angle);
 		if (pidAngle >= maxRotSpeed){
 			pidAngle = maxRotSpeed;
 		}

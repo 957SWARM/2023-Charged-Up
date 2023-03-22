@@ -9,8 +9,8 @@ public enum WristPositions {
     midCube(14, "midCube"),
     substation(14.5, "substation"),
     coneGround(2000, "cone ground"),
-    backShootCube(3, "back shoot"),
-    cubeGround(1950,"cube ground");
+    backShootCube(300, "back shoot"),
+    cubeGround(1850,"cube ground");
 
 
     private final double wristTargetSetpoint;
