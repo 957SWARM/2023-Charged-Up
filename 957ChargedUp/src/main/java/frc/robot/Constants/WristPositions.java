@@ -10,7 +10,7 @@ public enum WristPositions {
     substation(14.5, "substation"),
     coneGround(2000, "cone ground"),
     backShootCube(300, "back shoot"),
-    cubeGround(1850,"cube ground");
+    cubeGround(1950,"cube ground"); // 1850 for auto????
 
 
     private final double wristTargetSetpoint;

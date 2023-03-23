@@ -31,6 +31,7 @@ import frc.robot.Subclasses.ButtonBoardLeftNew;
 import frc.robot.Subclasses.ButtonBoardRight;
 import frc.robot.Subclasses.ButtonBoardRightNew;
 import frc.robot.Subclasses.DriveController;
+import frc.robot.Subclasses.NavController;
 import frc.robot.Subclasses.Wing;
 
 public class Robot extends TimedRobot {
@@ -48,6 +49,7 @@ public class Robot extends TimedRobot {
 	private final ButtonBoardRightNew m_bbRight = new ButtonBoardRightNew(2);
 	private final Wing m_wing = new Wing(2, 3);
 	private final DroneDrive drone = new DroneDrive();
+	private final NavController m_navController = new NavController(3);
 
 
 	//FULL LIST OF ACCESSABLE AUTOS
@@ -215,7 +217,7 @@ public class Robot extends TimedRobot {
 	
 			break;
 
-			case "coneLeftBlue":
+			case "coneLeft":
 				switch(autoVar){
 					case 0:
 						// RAISES ARM and WRIST
@@ -291,7 +293,7 @@ public class Robot extends TimedRobot {
 			break;
 		
 	
-			case "coneRightBlue":
+			case "coneRight":
 				switch(autoVar){
 					case 0:
 						System.out.println("Cone Right");
@@ -366,83 +368,6 @@ public class Robot extends TimedRobot {
 					break;
 				}	
 			break;
-
-			case "coneLeftRed":
-			switch(autoVar){
-				case 0:
-					// System.out.println("Cone Right");
-					// RAISES ARM and WRIST
-					if(autonomousTimer >= 0 && autonomousTimer < 2){
-						m_fourBar.setLevel(MoveFourBars.mid);
-					// DUNKS CONE
-					}else if( autonomousTimer >= 2 && autonomousTimer < 3.5){
-						m_wrist.set(WristPositions.scoreOut);
-					// DROPS CONE
-					}else if( autonomousTimer >= 3.5 && autonomousTimer < 4.5){
-						m_claw.cubeMode();
-					// RETRACT
-					}else if( autonomousTimer >= 4.5 && autonomousTimer < 5){
-						m_wrist.set(WristPositions.retract);
-					}else if( autonomousTimer >= 5 && autonomousTimer < 7){
-						m_fourBar.setLevel(MoveFourBars.ground);
-					}else if(autonomousTimer >= 7){
-						autonomousTimer = 0;
-						autoVar++;
-					}	
-
-				break;
-
-				// 
-				case 1:
-					m_claw.clawStop();
-					if (autonomousTimer < .8){
-						m_swerve.driveAngle( 2, 0, 180, true, 1);
-					}
-					else{
-						m_swerve.driveAngle(2, autoPID.getOutput(y, 0), 356, true, 2);
-
-					}
-					if(x >= 3.6){
-						autonomousTimer = 0;
-						autoVar ++;
-					}
-				break;
-
-				case 2:
-					m_swerve.driveAngle(0, 0, 356, true, 4);
-					if (autonomousTimer > .75){
-						autonomousTimer = 0;
-						autoVar++;
-					}
-				break;
-
-				case 3:
-					if (m_wrist.getLabel() != "cube ground"){
-						m_wrist.set(WristPositions.cubeGround);
-					}
-					if (autonomousTimer > .5){
-						autonomousTimer = 0;
-						m_claw.clawIntake(.4);
-						autoVar++;
-					}
-				break;
-
-				case 4:
-					if (autonomousTimer < 2.3){
-						m_swerve.driveAngle(.5, 0, 356, false, .3);
-						m_claw.clawIntake(.4);
-					}else{
-						m_claw.clawIntake(.4);
-						m_swerve.drive(0, 0, 0, false);
-						if (!m_claw.m_limitSwitch.get()){
-							m_wrist.set(WristPositions.retract);
-							m_claw.clawStop();
-						}
-					}	
-				break;
-			}	
-			break;
-			
 
 			case "placeDoNothingCube":
 				switch(autoVar){
@@ -537,7 +462,7 @@ public class Robot extends TimedRobot {
 					// PLACES Cube
 					case 1:
 						m_claw.clawOuttake(ShooterSpeed.highCube);
-						if(autonomousTimer >= 3.0)	// prev 3.5
+						if(autonomousTimer >= 2.0)	// prev 3.5
 							autoVar++;
 					break;
 
@@ -897,7 +822,6 @@ public class Robot extends TimedRobot {
 		m_wrist.set(WristPositions.cubeGround);
 
 	}
-
 
 	// Extra. Runs ARM, BLING, and Rumble 
 
